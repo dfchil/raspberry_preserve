@@ -26,7 +26,8 @@ def main(argv=None):
     while p_result == None:
         p_result = poll()
     
-    print "%s,%.2f,%.02f" % (time.strftime(dformat()), 0.0, 0.0)
+    print "%s,%.2f,%.02f" % (time.strftime(dformat()), p_result[0], p_result[1])
+
 	
 if __name__ == "__main__":
 	sys.exit(main())
