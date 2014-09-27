@@ -3,6 +3,7 @@
 
 import sys
 import time
+import os
 
 import Adafruit_DHT
 
