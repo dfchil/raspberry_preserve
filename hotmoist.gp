@@ -5,10 +5,10 @@ set output 'hotmoist.svg'
 
 
 
-set lmargin 4.5
+set lmargin 7.5
 set bmargin 6.0
-set rmargin 3.0
-set tmargin 0.4
+set rmargin 7.0
+set tmargin 1.4
 
 set key right top
 
@@ -17,13 +17,21 @@ unset ylabel
 
 set datafile separator ","
 
+
+
 set timefmt '%Y-%m-%d %H:%M'
-set yrange [ 0 : 80]
+# set yrange [ 0 : 80]
 set xdata time
 
+
+set ytics 1 nomirror
+set ylabel 'Luftfugtighed'
+
+set y2tics 1 nomirror
+set y2label 'Temperatur' 
 
 plot \
 'hotmoist.data' \
     using 1:2 with lines linecolor rgb "blue" title 'Luftfugtighed', \
 '' \
-    using 1:3 with lines linecolor rgb "red" title 'Temperatur', \
+    using 1:3 with lines linecolor rgb "red" title 'Temperatur' axes x1y2, \
