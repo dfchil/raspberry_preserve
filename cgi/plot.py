@@ -28,6 +28,3 @@ def write_gpcfg():
 def draw_svg(begin, end):    
     with  open("hotmoist.svg", 'r') as f:
         return f.read()
-
-def main(argv=None):
-    print draw_svg(None, None)
