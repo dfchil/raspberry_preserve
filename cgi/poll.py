@@ -23,7 +23,6 @@ def main(argv=None):
     
     pwd = os.path.dirname(os.path.realpath(__file__))
     
-    
     p_result = None
     while p_result == None:
         p_result = poll()

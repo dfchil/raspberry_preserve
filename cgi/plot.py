@@ -14,6 +14,7 @@ import sys
 import pconfig
 import uuid
 from subprocess import call
+import time
 
 def filerange(begin, end):
     return ["2014-09.data"]
@@ -21,13 +22,23 @@ def filerange(begin, end):
 def data_stride(begin, end):
     return 1
 
+def _l2secs(line):
+    tl = line.split(',')[0]
+    return time.mktime(time.strptime(tl, pconfig.dformat()))
+
 def get_lines(begin, end):
     lines = []
     stride = data_stride(begin, end)
     for fn in filerange(begin, end):
         with  open("data/%s"% fn, 'r') as f:
-            lines.extend(f.readlines()[0::stride])
-
+            for l in f.readlines()[0::stride]:
+                try:
+                    ts = _l2secs(l)
+                    if ts > begin and ts < end:
+                        lines.append(l)
+                except:
+                    continue
+                
     return lines
 
 def write_gpcfg():
