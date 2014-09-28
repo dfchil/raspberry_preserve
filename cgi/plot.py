@@ -51,10 +51,10 @@ def draw_svg(begin, end):
     set terminal svg size %d,%d solid linewidth 0.7
     set output '/tmp/%s.svg'
 
-    # set lmargin 7.5
-    # set bmargin 6.0
-    # set rmargin 7.0
-    # set tmargin 1.4
+    set lmargin 7.5
+    set bmargin 6.0
+    set rmargin 7.0
+    set tmargin 1.4
 
     set key right top
 
