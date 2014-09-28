@@ -3,7 +3,7 @@
 
 # Import modules for CGI handling 
 import cgi, cgitb 
-import pconfig
+import plot
 
 # Create instance of FieldStorage 
 
