@@ -2,14 +2,37 @@
 # encoding: utf-8
 
 # get range
-# read that range
+# calculate list of files spanned by range
+# calculate sample stride from range
+# read samples from files
+# output to /tmp/uuid.dt file 
+# write /tmp/uuid.gp file
+# use gnuplot to generate /tmp/uuid.svg
+# serve contents of /tmp/uuid.svg
 
 import sys
+import poll
 
-
-def main(argv=None):
+def filerange(begin, end):
+    pass
+    
+def data_stride():
     pass
 
+def get_lines(fname, stride):
+    pass
+
+def write_gpcfg():
+    pass
+    
+def draw_svg(begin, end):    
+    # f = open("hotmoist.svg", 'r')
+    # print f.read()
+    # f.close()
+    pass
+
+def main(argv=None):
+    print draw_svg(None, None)
 	
 if __name__ == "__main__":
 	sys.exit(main())

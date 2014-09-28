@@ -5,7 +5,6 @@ import sys
 import time
 import os
 
-import Adafruit_DHT
 
 def dformat():
     return "%Y-%m-%d %H:%M"
@@ -25,6 +24,7 @@ def poll():
 
 
 def main(argv=None):
+    import Adafruit_DHT
     
     ddir = "data"
     

@@ -9,22 +9,27 @@ set tmargin 1.4
 
 set key right top
 
-unset xlabel
-unset ylabel
+set yrange [30:75.5]
+set y2range [*:27]
 
 set datafile separator ","
-
-
 
 set timefmt '%Y-%m-%d %H:%M'
 set xdata time
 
-set ytics 1 nomirror
-set ylabel 'Luftfugtighed'
+set ytics 5 nomirror tc rgb "blue"
+set ylabel 'Humidity' tc rgb "blue"
 
-set y2tics 1 nomirror
-set y2label 'Temperatur' 
+set y2tics 1 nomirror tc rgb "red"
+set y2label 'Temperature'  tc rgb "red"
 
-plot 'hotmoist.data' \
-    using 1:2 with lines linecolor rgb "blue" title 'Luftfugtighed', \
-''  using 1:3 with lines linecolor rgb "red" title 'Temperatur' axes x1y2
+
+
+
+plot 'data/2014-09.data' \
+    using 1:2 with lines linecolor rgb "blue" title 'Humidity', \
+''  using 1:3 with lines linecolor rgb "red" title 'Temperature' axes x1y2 , \
+	35  with lines lt 0 linecolor rgb "blue" title "Humidity limits", \
+	65  with lines lt 0 linecolor rgb "blue" title "", \
+	26  with lines lt 0 linecolor rgb "red" title "Temperature max" axes x1y2
+	
