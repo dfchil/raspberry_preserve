@@ -1,11 +1,10 @@
 set terminal svg size 1280,720 solid linewidth 0.7
 set output 'hotmoist.svg'
 
-
-set lmargin 7.5
-set bmargin 6.0
-set rmargin 7.0
-set tmargin 1.4
+# set lmargin 7.5
+# set bmargin 6.0
+# set rmargin 7.0
+# set tmargin 1.4
 
 set key right top
 
@@ -22,9 +21,6 @@ set ylabel 'Humidity' tc rgb "blue"
 
 set y2tics 1 nomirror tc rgb "red"
 set y2label 'Temperature'  tc rgb "red"
-
-
-
 
 plot 'data/2014-09.data' \
     using 1:2 with lines linecolor rgb "blue" title 'Humidity', \
