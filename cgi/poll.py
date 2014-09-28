@@ -4,13 +4,8 @@
 import sys
 import time
 import os
+import pconfig
 
-
-def dformat():
-    return "%Y-%m-%d %H:%M"
-    
-def dfilename_fmt():
-    return "%Y-%m"
 
 def poll():
     sensor = Adafruit_DHT.AM2302
@@ -35,7 +30,8 @@ def main(argv=None):
 
     with open("%s/%s/%s.data" % (pwd, ddir, time.strftime(dfilename_fmt())), "a") as outfile:
         outfile.write("%s,%.2f,%.02f\n" % (time.strftime(dformat()), p_result[0], p_result[1]))
-    	
+
+
 if __name__ == "__main__":
     import Adafruit_DHT
-	sys.exit(main())
+    sys.exit(main())

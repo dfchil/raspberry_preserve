@@ -11,7 +11,7 @@
 # serve contents of /tmp/uuid.svg
 
 import sys
-import poll
+import pconfig
 
 def filerange(begin, end):
     pass
