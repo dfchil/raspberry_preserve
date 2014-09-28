@@ -31,6 +31,3 @@ def draw_svg(begin, end):
 
 def main(argv=None):
     print draw_svg(None, None)
-	
-if __name__ == "__main__":
-	sys.exit(main())
