@@ -25,6 +25,7 @@ def get_lines(fname, stride):
 def write_gpcfg():
     pass
     
+    
 def draw_svg(begin, end):    
     with  open("hotmoist.svg", 'r') as f:
         return f.read()
