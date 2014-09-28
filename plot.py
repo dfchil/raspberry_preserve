@@ -26,10 +26,8 @@ def write_gpcfg():
     pass
     
 def draw_svg(begin, end):    
-    # f = open("hotmoist.svg", 'r')
-    # print f.read()
-    # f.close()
-    pass
+    with  open("hotmoist.svg", 'r') as f
+    return f.read()
 
 def main(argv=None):
     print draw_svg(None, None)
