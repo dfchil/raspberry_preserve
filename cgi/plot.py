@@ -32,7 +32,8 @@ def get_lines(begin, end):
 
 def write_gpcfg():
     pass
-    
+
+
 def draw_svg(begin, end):
     
     uid = str(uuid.uuid4())
@@ -89,5 +90,5 @@ def draw_svg(begin, end):
     with  open("/tmp/%s.svg" % uid, 'r') as f:
         return f.read()
 
-if __name__ == "__main__":
-    print draw_svg(None, None)
+# if __name__ == "__main__":
+#     print draw_svg(None, None)

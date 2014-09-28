@@ -28,8 +28,8 @@ def main(argv=None):
     while p_result == None:
         p_result = poll()
 
-    with open("%s/%s/%s.data" % (pwd, ddir, time.strftime(dfilename_fmt())), "a") as outfile:
-        outfile.write("%s,%.2f,%.02f\n" % (time.strftime(dformat()), p_result[0], p_result[1]))
+    with open("%s/%s/%s.data" % (pwd, ddir, time.strftime(pconfig.dfilename_fmt())), "a") as outfile:
+        outfile.write("%s,%.2f,%.02f\n" % (time.strftime(pconfig.dformat()), p_result[0], p_result[1]))
 
 
 if __name__ == "__main__":
