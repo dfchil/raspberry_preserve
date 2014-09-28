@@ -23,9 +23,7 @@ def poll():
 	    return None
 
 
-def main(argv=None):
-    import Adafruit_DHT
-    
+def main(argv=None):    
     ddir = "data"
     
     pwd = os.path.dirname(os.path.realpath(__file__))
@@ -39,4 +37,5 @@ def main(argv=None):
         outfile.write("%s,%.2f,%.02f\n" % (time.strftime(dformat()), p_result[0], p_result[1]))
     	
 if __name__ == "__main__":
+    import Adafruit_DHT
 	sys.exit(main())
