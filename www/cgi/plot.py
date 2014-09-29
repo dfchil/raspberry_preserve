@@ -5,10 +5,10 @@
 # calculate list of files spanned by range
 # calculate sample stride from range
 # read samples from files
-# output to /tmp/uuid.dt file 
-# write /tmp/uuid.gp file
-# use gnuplot to generate /tmp/uuid.svg
-# serve contents of /tmp/uuid.svg
+# output to /ramdisk/uuid.dt file 
+# write /ramdisk/uuid.gp file
+# use gnuplot to generate /ramdisk/uuid.svg
+# serve contents of /ramdisk/uuid.svg
 
 import sys
 import pconfig
@@ -19,8 +19,10 @@ import time
 def filerange(begin, end):
     return ["2014-09.data"]
     
-def data_stride(begin, end):
-    return 1
+def data_stride(begin, end, num_points):
+    stride = ((end - begin) / 60)/num_points
+    stride = 1 if stride < 1 else stride
+    return int(stride)
 
 def _l2secs(line):
     tl = line.split(',')[0]
@@ -28,7 +30,7 @@ def _l2secs(line):
 
 def get_lines(begin, end):
     lines = []
-    stride = data_stride(begin, end)
+    stride = data_stride(begin, end, 640)
     for fn in filerange(begin, end):
         with  open("data/%s"% fn, 'r') as f:
             for l in f.readlines()[0::stride]:
@@ -45,28 +47,20 @@ def write_gpcfg():
     pass
 
 
-def draw_svg(begin, end):
+def draw_svg(begin, end, width, height):
     
     uid = str(uuid.uuid4())
 
     #write data file
-    with open("/tmp/%s.data" % uid, "w") as dfo:
+    with open("/ramdisk/%s.data" % uid, "w") as dfo:
         dfo.write("".join(get_lines(begin, end)))
-    
-    
-    height = 720
-    width = 1280
     
     #write gnuplot cfg file
     gpcfg = """
-    set terminal svg size %d,%d solid linewidth 0.7
-    set output '/tmp/%s.svg'
-
-    set lmargin 7.5
+    set terminal svg size %d,%d dashed linewidth 0.7
+    set output '/ramdisk/%s.svg'
+    
     set bmargin 6.0
-    set rmargin 7.0
-    set tmargin 1.4
-
     set key right top
 
     set yrange [30:75.5]
@@ -83,23 +77,26 @@ def draw_svg(begin, end):
     set y2tics 1 nomirror tc rgb "red"
     set y2label 'Temperature'  tc rgb "red"
 
-    plot '/tmp/%s.data' \
-        using 1:2 with lines linecolor rgb "blue" title 'Humidity', \
-    ''  using 1:3 with lines linecolor rgb "red" title 'Temperature' axes x1y2 , \
-    	35  with lines lt 0 linecolor rgb "blue" title "Humidity limits", \
-    	65  with lines lt 0 linecolor rgb "blue" title "", \
-    	26  with lines lt 0 linecolor rgb "red" title "Temperature max" axes x1y2
+    plot '/ramdisk/%s.data' \
+        using 1:2 with lines lt 1 linecolor rgb "blue" title 'Humidity %%', \
+    ''  using 1:3 with lines lt 1 linecolor rgb "red" title 'Degrees Celsius' axes x1y2 , \
+    	35  with lines lt 3 linecolor rgb "blue" title "Humidity limits", \
+    	65  with lines lt 3 linecolor rgb "blue" title "", \
+    	26  with lines lt 3 linecolor rgb "red" title "Temperature max" axes x1y2
         
     """ % (width, height, uid, pconfig.dformat(), uid)
     
-    gpcfgfn  = "/tmp/%s.gp" % uid
+    gpcfgfn  = "/ramdisk/%s.gp" % uid
     with open(gpcfgfn, "w") as gpfo:
         gpfo.write(gpcfg)
     
     call(["gnuplot", "%s" %gpcfgfn])
-    
-    with  open("/tmp/%s.svg" % uid, 'r') as f:
-        return f.read()
+
+    with  open("/ramdisk/%s.svg" % uid, 'r') as f:
+        outp = f.read()
+    call(["rm", "/ramdisk/%s.gp" % uid, "/ramdisk/%s.data" % uid, "/ramdisk/%s.svg" % uid])
+
+    return outp
 
 # if __name__ == "__main__":
 #     print draw_svg(None, None)

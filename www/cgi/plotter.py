@@ -26,4 +26,7 @@ if begin == None:
 end = time.mktime(time.strptime(end, pconfig.dformat()))
 begin =  time.mktime(time.strptime(begin, pconfig.dformat()))
 
-print plot.draw_svg(begin, end)
+end = end if end < time.localtime() else time.localtime()
+
+
+print plot.draw_svg(begin, end, 960, 720)
