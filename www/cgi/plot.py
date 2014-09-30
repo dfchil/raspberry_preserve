@@ -15,56 +15,67 @@ import pconfig
 import uuid
 from subprocess import call
 import time
+import glob
+
+
+def first_entry(tformat):
+    dfiles = sorted(glob.glob("./data/*.data"))
+    if len(dfiles):
+        with open(dfiles[0]) as ffile:
+            return _l2secs(ffile.readline(), tformat)
 
 def filerange(begin, end):
-    return ["2014-09.data"]
-    
-def data_stride(begin, end, num_points):
-    stride = ((end - begin) / 60)/num_points
+    return ["2014-09.data", "2014-10.data"]
+
+def data_stride(begin, end, num_points, sample_interval):
+    stride = ((end - begin) / sample_interval)/num_points
     stride = 1 if stride < 1 else stride
     return int(stride)
 
-def _l2secs(line):
+def _l2secs(line, tformat):
     tl = line.split(',')[0]
-    return time.mktime(time.strptime(tl, pconfig.dformat()))
+    return time.mktime(time.strptime(tl, tformat))
 
-def get_lines(begin, end):
+def get_lines(begin, end, tformat, max_data_points, sample_interval):
     lines = []
-    stride = data_stride(begin, end, 640)
+    stride = data_stride(begin, end, max_data_points, sample_interval)
     for fn in filerange(begin, end):
-        with  open("data/%s"% fn, 'r') as f:
-            for l in f.readlines()[0::stride]:
+        with open("data/%s"% fn, 'r') as f:
+            flines = f.readlines()
+        if len(flines)> 0:
+            # begin_off  = _l2secs(flines[0], tformat)
+            # begin_off = int(( begin- begin_off) / sample_interval)
+            # begin_off = begin_off if begin_off > 0 else 0
+            # end_off  = _l2secs(flines[-1], tformat)
+            # end_off = int((end_off - end) / sample_interval)
+            # end_off = -end_off if end_off > 0 else len(flines)
+            # lines.extend(flines[begin_off:end_off:stride])
+            for l in flines[::stride]:
                 try:
-                    ts = _l2secs(l)
+                    ts = _l2secs(l, tformat)
                     if ts > begin and ts < end:
                         lines.append(l)
                 except:
                     continue
-                
     return lines
 
-def write_gpcfg():
-    pass
 
-
-def draw_svg(begin, end, width, height):
+def write_gpcfg(width, height, uid_fbase, cfg):
     
-    uid = str(uuid.uuid4())
-
-    #write data file
-    with open("/ramdisk/%s.data" % uid, "w") as dfo:
-        dfo.write("".join(get_lines(begin, end)))
+    timeformat = cfg.get('settings', 'timeformat')
+    hmin = float(cfg.get('settings', 'humidity_min'))
+    hmax = float(cfg.get('settings', 'humidity_max'))
+    tmax = float(cfg.get('settings', 'temperature_max'))
     
-    #write gnuplot cfg file
     gpcfg = """
     set terminal svg size %d,%d dashed linewidth 0.7
-    set output '/ramdisk/%s.svg'
+    set output '%s.svg'
     
     set bmargin 6.0
     set key right top
 
-    set yrange [30:75.5]
-    set y2range [*:27]
+    set yrange [%f:%f]
+    set y2range [*:%f]
 
     set datafile separator ","
 
@@ -77,26 +88,43 @@ def draw_svg(begin, end, width, height):
     set y2tics 1 nomirror tc rgb "red"
     set y2label 'Temperature'  tc rgb "red"
 
-    plot '/ramdisk/%s.data' \
+    plot '%s.data' \
         using 1:2 with lines lt 1 linecolor rgb "blue" title 'Humidity %%', \
     ''  using 1:3 with lines lt 1 linecolor rgb "red" title 'Degrees Celsius' axes x1y2 , \
-    	35  with lines lt 3 linecolor rgb "blue" title "Humidity limits", \
-    	65  with lines lt 3 linecolor rgb "blue" title "", \
-    	26  with lines lt 3 linecolor rgb "red" title "Temperature max" axes x1y2
-        
-    """ % (width, height, uid, pconfig.dformat(), uid)
+    	%f  with lines lt 3 linecolor rgb "blue" title "Humidity limits", \
+    	%f  with lines lt 3 linecolor rgb "blue" title "", \
+    	%f  with lines lt 3 linecolor rgb "red" title "Temperature max" axes x1y2
+    """ % ( width, height, uid_fbase, 
+            hmin-10, hmax+10, tmax+1.5, 
+            timeformat, uid_fbase, hmin, hmax, tmax)
     
-    gpcfgfn  = "/ramdisk/%s.gp" % uid
+    gpcfgfn  = "%s.gp" % uid_fbase
     with open(gpcfgfn, "w") as gpfo:
         gpfo.write(gpcfg)
-    
-    call(["gnuplot", "%s" %gpcfgfn])
 
-    with  open("/ramdisk/%s.svg" % uid, 'r') as f:
+
+def draw_svg(begin, end, width, height):
+    
+    cfg = pconfig.read('rb_preserve.cfg')
+    
+    uid_fbase =  "%s/%s" % (cfg.get('settings', 'tmp_dir') ,str(uuid.uuid4()))
+
+    #write data file
+    with open("%s.data" % uid_fbase, "w") as dfo:
+        dfo.write("".join(get_lines(begin, end, 
+                          cfg.get('settings', 'timeformat'), 
+                          int(cfg.get('settings', 'max_plot_points')),
+                          int(cfg.get('settings', 'sample_period'))*60)))
+    #write gnuplot cfg file
+    write_gpcfg(width, height, uid_fbase, cfg)
+    
+    # make gnuplot generate the svg file
+    call(["gnuplot", "%s.gp" % uid_fbase ])
+
+    with  open("%s.svg" % uid_fbase, 'r') as f:
         outp = f.read()
-    call(["rm", "/ramdisk/%s.gp" % uid, "/ramdisk/%s.data" % uid, "/ramdisk/%s.svg" % uid])
+        
+    #clean up tmp files
+    call(["rm", "%s.gp" % uid_fbase, "%s.data" % uid_fbase, "%s.svg" % uid_fbase])
 
     return outp
-
-# if __name__ == "__main__":
-#     print draw_svg(None, None)
