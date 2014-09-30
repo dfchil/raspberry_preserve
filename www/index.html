@@ -4,8 +4,61 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 	<head>
 		<title>moisture and temperature monitor</title>
+        <link rel="stylesheet" type="text/css" media="screen" href="css/bootstrap-combined.min.css" />
+        <link rel="stylesheet" type="text/css" media="screen" href="css/bootstrap-datetimepicker.min.css" />
+        <script type="text/javascript" src="js/jquery.min.js"></script> 
+         <script type="text/javascript" src="js/bootstrap.min.js"></script>
+         <script type="text/javascript" src="js/bootstrap-datetimepicker.min.js"></script>
+         <script type="text/javascript" src="js/do-timeout.js"></script>
+        
+        <script type="text/javascript">
+        function replot(){
+            var begin = $('#begin_val');
+            var end =   $('#end_val');
+            var url = encodeURI('cgi/plotter.py?begin=' + begin.val() +"&end="+end.val());
+            $('#svg1').attr('data',url);
+        }
+        
+        function init(){
+            var options = {
+                pickSeconds: false,
+                format: 'yyyy-MM-dd hh:mm',}
+            $('#begin').datetimepicker(options);
+            $('#end').datetimepicker(options);
+            
+            var endtime = $.now();
+            var begintime = endtime - 36*60*60*1000;
+
+            $('#begin').data('datetimepicker').setLocalDate(new Date(begintime));            
+            $('#end').data('datetimepicker').setLocalDate(new Date(endtime));
+            
+            
+            $( ".date" ).on( "changeDate", function(e) {
+                $.doTimeout( 'someid', 1500, function(){replot()}, true);
+                });
+            replot();
+        }
+        </script>
 	</head>
-	<body onload="document.getElementById('svg1').data='cgi/plotter.py'">
+	<body onload="init()">
+        <div id="begin" class="input-append date">
+          <input data-format="yyyy-MM-dd hh:mm" type="text" id="begin_val" ></input>
+          <span class="add-on">
+            <i data-time-icon="icon-time" data-date-icon="icon-calendar"></i>
+          </span>
+        </div>
+
+        <div id="end" class="input-append date">
+          <input data-format="yyyy-MM-dd hh:mm" type="text" id="end_val"></input>
+          <span class="add-on">
+            <i data-time-icon="icon-time" data-date-icon="icon-calendar"></i>
+          </span>
+        </div>
+        
+        <div style="clear:both"></div>
+                
 		<object id="svg1" width="980" height="740"  type="image/svg+xml"></object>
+        
 	</body>
 </html>
+

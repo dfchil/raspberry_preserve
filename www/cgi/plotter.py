@@ -16,7 +16,7 @@ def cond_read(strnme, alt, form):
 
 #default time is past 24 hours
 tend =   int(time.time())
-tbegin = tend - 60*60*24
+tbegin = tend - 60*60*48
 
 cfg = pconfig.read('rb_preserve.cfg')
 
