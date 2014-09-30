@@ -57,7 +57,7 @@ def get_lines(begin, end, tformat, max_data_points, sample_interval):
                         lines.append(l)
                 except:
                     continue
-    print len(lines), stride, begin_off, end_off
+    # print len(lines), stride, begin_off, end_off
     return lines
 
 
