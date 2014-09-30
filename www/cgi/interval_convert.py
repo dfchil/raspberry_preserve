@@ -47,4 +47,22 @@ def get_lines(tformat, cond_fac):
 
 if __name__ == "__main__":
     cfg = pconfig.read('rb_preserve.cfg')
-    print "".join(get_lines(cfg.get('settings', 'timeformat'), 10))
+    # print "".join(get_lines(cfg.get('settings', 'timeformat'), 10))
+    
+    with  open("data/2014-09.data", 'r') as f:
+        lines = f.readlines()
+
+    endtime = time.time() #+ time.timezone
+    begintime = endtime - len(lines)*600
+    
+    outlines = []
+    
+    for l in lines:
+        _, h, t = l.split(',')
+        ttime = time.localtime(begintime)
+        ttime = time.strftime(cfg.get('settings', 'timeformat'), ttime)
+        begintime += 600
+        outlines.append("%s,%s,%s" % (ttime, h, t))
+
+    print "".join(outlines)
+    
