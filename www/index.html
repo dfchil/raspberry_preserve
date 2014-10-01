@@ -20,18 +20,21 @@
         }
         
         function init(){
+            var endtime = $.now();
+            var begintime = endtime - 36*60*60*1000;
+			
             var options = {
                 pickSeconds: false,
-                format: 'yyyy-MM-dd hh:mm',}
+                format: 'yyyy-MM-dd hh:mm',
+				endDate: new Date(endtime),}
             $('#begin').datetimepicker(options);
             $('#end').datetimepicker(options);
             
-            var endtime = $.now();
-            var begintime = endtime - 36*60*60*1000;
-
             $('#begin').data('datetimepicker').setLocalDate(new Date(begintime));            
             $('#end').data('datetimepicker').setLocalDate(new Date(endtime));
             
+			// $('#end').data("DateTimePicker").setMaxDate(new Date(endtime));
+			// $('#begin').data("DateTimePicker").setMaxDate(new Date(endtime));
             
             $( ".date" ).on( "changeDate", function(e) {
                 $.doTimeout( 'someid', 1500, function(){replot()}, true);

@@ -13,10 +13,11 @@
 import sys
 import pconfig
 import uuid
-from subprocess import call
+from subprocess import check_output
 import time
 import glob
 import math
+import os
 
 def first_entry(tformat):
     dfiles = sorted(glob.glob("./data/*.data"))
@@ -49,14 +50,14 @@ def get_lines(begin, end, tformat, max_data_points, sample_interval):
             end_off  = _l2secs(flines[-1], tformat)
             end_off = int((end_off - end) / sample_interval)
             end_off = -end_off if end_off > 0 else len(flines)
-            # lines.extend(flines[begin_off:end_off:stride])
-            for l in flines[begin_off:end_off:stride]:
-                try:
-                    ts = _l2secs(l, tformat)
-                    if ts > begin and ts < end:
-                        lines.append(l)
-                except:
-                    continue
+            lines.extend(flines[begin_off:end_off:stride])
+            # for l in flines[begin_off:end_off:stride]:
+            #     try:
+            #         ts = _l2secs(l, tformat)
+            #         if ts > begin and ts < end:
+            #             lines.append(l)
+            #     except:
+            #         continue
     # print len(lines), stride, begin_off, end_off
     return lines
 
@@ -70,7 +71,7 @@ def write_gpcfg(width, height, uid_fbase, cfg):
     
     gpcfg = """
     set terminal svg size %d,%d dashed linewidth 0.7
-    set output '%s.svg'
+    #set output '%s.svg'
     
     set bmargin 6.0
     set key right top
@@ -120,12 +121,10 @@ def draw_svg(begin, end, width, height):
     write_gpcfg(width, height, uid_fbase, cfg)
     
     # make gnuplot generate the svg file
-    call(["gnuplot", "%s.gp" % uid_fbase ])
+    outp = check_output(["gnuplot", "%s.gp" % uid_fbase ])
 
-    with  open("%s.svg" % uid_fbase, 'r') as f:
-        outp = f.read()
-        
     #clean up tmp files
-    call(["rm", "%s.gp" % uid_fbase, "%s.data" % uid_fbase, "%s.svg" % uid_fbase])
+    os.remove("%s.gp" % uid_fbase)
+    os.remove("%s.data" % uid_fbase)
 
     return outp
