@@ -1,77 +1,138 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
-	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-	<head>
-		<title>moisture and temperature monitor</title>
+    <head>
+        <title>
+            moisture and temperature monitor
+        </title>
         <link rel="stylesheet" type="text/css" media="screen" href="css/bootstrap-combined.min.css" />
         <link rel="stylesheet" type="text/css" media="screen" href="css/bootstrap-datetimepicker.min.css" />
-         <script type="text/javascript" src="js/jquery.min.js"></script> 
-         <script type="text/javascript" src="js/bootstrap.min.js"></script>
-         <script type="text/javascript" src="js/bootstrap-datetimepicker.min.js"></script>
-         <script type="text/javascript" src="js/do-timeout.js"></script>
+        <link rel="stylesheet" type="text/css" media="screen" href="css/base/all.css" />
+
+        <script type="text/javascript" src="js/jquery.min.js"></script>
+        <script type="text/javascript" src="js/bootstrap.min.js"></script>
+        <script type="text/javascript" src="js/bootstrap-datetimepicker.min.js"></script>
+        <script type="text/javascript" src="js/do-timeout.js"></script>
+        
+        <script src="js/jquery.easytabs.min.js" type="text/javascript"></script>
+        
+        <style>
+          /* Example Styles for Demo */
+          .etabs { margin: 0; padding: 0; }
+          .tab { display: inline-block; zoom:1; *display:inline; background: #eee; border: solid 1px #999; border-bottom: none; -moz-border-radius: 4px 4px 0 0; -webkit-border-radius: 4px 4px 0 0; }
+          .tab a { font-size: 14px; line-height: 2em; display: block; padding: 0 10px; outline: none; }
+          .tab a:hover { text-decoration: underline; }
+          .tab.active { background: #fff; padding-top: 6px; position: relative; top: 1px; border-color: #666; }
+          .tab a.active { font-weight: bold; }
+          .tab-container .panel-container { background: #fff; border: solid #666 1px; padding: 10px; -moz-border-radius: 0 4px 4px 4px; -webkit-border-radius: 0 4px 4px 4px;} 
+          #outerframe { width:93%; margin-left: auto ; margin-right: auto ; margin-top:20px;}
+          .panel-container { margin-bottom: 10px; }
+        </style>
+
+        <script type="text/javascript">
+          $(document).ready( function() {
+            $('#tab-container').easytabs();
+          });
+        </script>
+        
+<!---
+        <script src="js/ui/core.js" type="text/javascript"></script>
+        <script src="js/ui/widget.js" type="text/javascript"></script>
+        <script src="js/ui/tabs.js" type="text/javascript"></script>
+
+        <link rel="stylesheet" href="css/ui-demos.css" type="text/css" /> -->
         <script type="text/javascript">
 //<![CDATA[
-        function replot(a_begin, a_end){
-            var begin = a_begin || $('#begin_val').val();
-            var end =   a_end || $('#end_val').val();
-            var url = encodeURI('cgi/plotter.py?begin=' + begin +"&end="+end);
-            $('#svg1').attr('data',url);
-        }
-        
-        function init(){
-            var endtime = $.now();
-            var begintime = endtime - 60*60*1000 * default_begin();
 
+        // jQuery = jQuery.noConflict(true); 
+        function replot(a_begin, a_end, a_width, a_height){
+            var begin = a_begin || jQuery('#begin_val').val();
+            var end =   a_end || jQuery('#end_val').val();
+            var width = parseInt(a_width || jQuery('#outerframe').width() , 10);
+            var height = parseInt(a_height || jQuery( window).height() *0.8 , 10);
+            var url = encodeURI('cgi/plotter.py?begin=' + begin +
+                                                "&end="+end +
+                                                "&width="+width+
+                                                "&height="+height);
+            jQuery('#svg1').attr('width',width+20);
+            jQuery('#svg1').attr('height',height+20);
+            jQuery('#svg1').attr('data',url);
+        }
+
+        function init(){
+            var endtime = jQuery.now();
+            var begintime = endtime - 60*60*1000 * default_begin();
+            
             var options = {
                 pickSeconds: false,
                 format: 'yyyy-MM-dd hh:mm',
-				endDate: new Date(endtime),
+                endDate: new Date(endtime),
                 startDate: new Date(min_secs()),
             }
+            jQuery('#begin_val').attr("data-format", options['format']);
+            jQuery('#end_val').attr("data-format", options['format']);
+            jQuery('i').each(function(){
+                jQuery(this).attr("data-time-icon","icon-time");
+                jQuery(this).attr("data-date-icon","icon-calendar");
+            });
             
-            $('begin_val').attr("data-format", options['format']);
-            $('end_val').attr("data-format", options['format']);
-            $('elementname').each(function(){
-                $(this).attr("data-time-icon","icon-time");
-                $(this).attr("data-date-icon","icon-calendar");
-            })
-            
-            $('#begin').datetimepicker(options);
-            $('#end').datetimepicker(options);
-            
-            $('#begin').data('datetimepicker').setLocalDate(new Date(begintime));            
-            $('#end').data('datetimepicker').setLocalDate(new Date(endtime));
-            
-            $( ".date" ).on( "changeDate", function(e) {
-                $.doTimeout( 'someid', 1500, function(){replot()}, true);
+            jQuery('#begin').datetimepicker(options);
+            jQuery('#end').datetimepicker(options);
+
+
+            jQuery('#begin').data('datetimepicker').setLocalDate(new Date(begintime));
+            jQuery('#end').data('datetimepicker').setLocalDate(new Date(endtime));
+
+            jQuery( ".date" ).on( "changeDate", function(e) {
+                jQuery.doTimeout( 'someid', 1200, function(){replot()}, true);
                 });
+                
+            jQuery( window ).resize(function() {
+                jQuery.doTimeout( 'resize', 1200, function(){replot()}, true);
+                });
+            replot();
         }
         //]]>
         </script>
-	</head>
-	<body onload="init()">
-        <div>
-        <div id="begin" class="input-append date">
-          <input type="text" id="begin_val" ></input>
-          <span class="add-on">
-            <i></i>
-          </span>
-        </div>
+    </head>
+    <body onload="init()">
+        <div id="outerframe">
+        <div id="tab-container" class='tab-container'>
+         <ul class='etabs'>
+           <li class='tab'><a href="#tabs1-html">Data browser</a></li>
+           <li class='tab'><a href="#tabs1-js">Configuration</a></li>
+         </ul>
+         <div class='panel-container'>
+             <div id="tabs1-html">
+                <div id="begin" class="input-append date">
+                    <input type="text" id="begin_val" />
+                    <span class="add-on">
+                      <i></i>
+                    </span>
+                </div>
+                <div id="end" class="input-append date">
+                    <input type="text" id="end_val" />
+                    <span class="add-on">
+                      <i></i>
+                    </span>
+                </div>
+                <object id="svg1" width="980" height="740" type="image/svg+xml"></object>
+                </div>
+                   <div id="tabs1-js">
+                   <h2>JS for these tabs</h2>
 
-        <div id="end" class="input-append date">
-          <input type="text" id="end_val"></input>
-          <span class="add-on">
-            <i></i>
-          </span>
+                   <pre>
+                    <code>
+                &lt;script src="/javascripts/jquery.js" type="text/javascript"&gt;&lt;/script&gt;
+                &lt;script src="/javascripts/jquery.hashchange.js" type="text/javascript"&gt;&lt;/script&gt;
+                &lt;script src="/javascripts/jquery.easytabs.js" type="text/javascript"&gt;&lt;/script&gt;
+                    </code>
+                  </pre>
+              </div>
+          </div>
         </div>
-        
-        <div style="clear:both"></div>
-                
-		<object id="svg1" width="980" height="740" data="cgi/plotter.py" type="image/svg+xml"></object>
-    </div>
-    <script type="text/javascript" src="cgi/bootstrap.js.py"></script>
-	</body>
-    
+        </div>
+        <script type="text/javascript" src="cgi/bootstrap.js.py"></script>
+    </body>
 </html>
-
