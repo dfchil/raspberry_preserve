@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# -*- coding: UTF-8 -*-# enable debugging
+# encoding: utf-8
 
 
 import ConfigParser
@@ -26,6 +26,7 @@ def read(fname):
         'SMTP_server': 'smtp.gmail.com:587',
         'SMTP_username' : '',
         'SMTP_password' : '',
+        'default_view_hours': 48
     }
     
     #read config file if present

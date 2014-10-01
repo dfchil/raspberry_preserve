@@ -6,62 +6,72 @@
 		<title>moisture and temperature monitor</title>
         <link rel="stylesheet" type="text/css" media="screen" href="css/bootstrap-combined.min.css" />
         <link rel="stylesheet" type="text/css" media="screen" href="css/bootstrap-datetimepicker.min.css" />
-        <script type="text/javascript" src="js/jquery.min.js"></script> 
+         <script type="text/javascript" src="js/jquery.min.js"></script> 
          <script type="text/javascript" src="js/bootstrap.min.js"></script>
          <script type="text/javascript" src="js/bootstrap-datetimepicker.min.js"></script>
          <script type="text/javascript" src="js/do-timeout.js"></script>
-        
         <script type="text/javascript">
-        function replot(){
-            var begin = $('#begin_val');
-            var end =   $('#end_val');
-            var url = encodeURI('cgi/plotter.py?begin=' + begin.val() +"&end="+end.val());
+//<![CDATA[
+        function replot(a_begin, a_end){
+            var begin = a_begin || $('#begin_val').val();
+            var end =   a_end || $('#end_val').val();
+            var url = encodeURI('cgi/plotter.py?begin=' + begin +"&end="+end);
             $('#svg1').attr('data',url);
         }
         
         function init(){
             var endtime = $.now();
-            var begintime = endtime - 36*60*60*1000;
-			
+            var begintime = endtime - 60*60*1000 * default_begin();
+
             var options = {
                 pickSeconds: false,
                 format: 'yyyy-MM-dd hh:mm',
-				endDate: new Date(endtime),}
+				endDate: new Date(endtime),
+                startDate: new Date(min_secs()),
+            }
+            
+            $('begin_val').attr("data-format", options['format']);
+            $('end_val').attr("data-format", options['format']);
+            $('elementname').each(function(){
+                $(this).attr("data-time-icon","icon-time");
+                $(this).attr("data-date-icon","icon-calendar");
+            })
+            
             $('#begin').datetimepicker(options);
             $('#end').datetimepicker(options);
             
             $('#begin').data('datetimepicker').setLocalDate(new Date(begintime));            
             $('#end').data('datetimepicker').setLocalDate(new Date(endtime));
             
-			// $('#end').data("DateTimePicker").setMaxDate(new Date(endtime));
-			// $('#begin').data("DateTimePicker").setMaxDate(new Date(endtime));
-            
             $( ".date" ).on( "changeDate", function(e) {
                 $.doTimeout( 'someid', 1500, function(){replot()}, true);
                 });
-            replot();
         }
+        //]]>
         </script>
 	</head>
 	<body onload="init()">
+        <div>
         <div id="begin" class="input-append date">
-          <input data-format="yyyy-MM-dd hh:mm" type="text" id="begin_val" ></input>
+          <input type="text" id="begin_val" ></input>
           <span class="add-on">
-            <i data-time-icon="icon-time" data-date-icon="icon-calendar"></i>
+            <i></i>
           </span>
         </div>
 
         <div id="end" class="input-append date">
-          <input data-format="yyyy-MM-dd hh:mm" type="text" id="end_val"></input>
+          <input type="text" id="end_val"></input>
           <span class="add-on">
-            <i data-time-icon="icon-time" data-date-icon="icon-calendar"></i>
+            <i></i>
           </span>
         </div>
         
         <div style="clear:both"></div>
                 
-		<object id="svg1" width="980" height="740"  type="image/svg+xml"></object>
-        
+		<object id="svg1" width="980" height="740" data="cgi/plotter.py" type="image/svg+xml"></object>
+    </div>
+    <script type="text/javascript" src="cgi/bootstrap.js.py"></script>
 	</body>
+    
 </html>
 
