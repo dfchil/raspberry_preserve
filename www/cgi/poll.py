@@ -58,7 +58,7 @@ def warning_test(humidity, temperature, cfg):
     if humidity < float(cfg.get('settings', 'humidity_min')):
         send_warning("Low humidty", humidity, cfg)
     if humidity > float(cfg.get('settings', 'humidity_max')):
-        send_warning("Ligh humidty", humidity, cfg)
+        send_warning("High humidty", humidity, cfg)
         
     if temperature > float(cfg.get('settings', 'temperature_max')):
         send_warning("High temperature", temperature, cfg)

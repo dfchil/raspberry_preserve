@@ -19,11 +19,18 @@ import glob
 import math
 import os
 
-def first_entry(tformat):
+def data_span(tformat):
     dfiles = sorted(glob.glob("./data/*.data"))
+    
+    first = time.time()
+    last = first
+
     if len(dfiles):
         with open(dfiles[0]) as ffile:
-            return _l2secs(ffile.readline(), tformat)
+            first = _l2secs(ffile.readline(), tformat)
+            
+        last = _l2secs(check_output(["tail", "-n", "1", dfiles[-1]]), tformat)
+    return (first, last)
 
 def filerange(begin, end):
     return ["2014-09.data", "2014-10.data"]
@@ -73,7 +80,7 @@ def write_gpcfg(width, height, uid_fbase, cfg):
     set terminal svg size %d,%d dashed linewidth 0.7
     #set output '%s.svg'
     
-    set bmargin 6.0
+    set bmargin 4.0
     set key right top
 
     set yrange [%f:%f]

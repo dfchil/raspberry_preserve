@@ -51,7 +51,7 @@ if __name__ == "__main__":
     if getvals['end'] > tend:
         getvals['end'] = tend
 
-    firstvalue = plot.first_entry(timeformat)
+    firstvalue, lastvalue =plot.data_span(timeformat)
     if getvals['begin'] < firstvalue:
         getvals['begin'] = firstvalue
 
