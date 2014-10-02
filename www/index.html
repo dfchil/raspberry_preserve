@@ -64,174 +64,168 @@
     <script type="text/javascript">
 //<![CDATA[
 
-            function getISODateTime(d){
-                // padding function
-                var s = function(a,b){return(1e15+a+"").slice(-b)};
+function getISODateTime(d){
+    // padding function
+    var s = function(a,b){return(1e15+a+"").slice(-b)};
 
-                // default date parameter
-                if (typeof d === 'undefined'){
-                    d = new Date();
-                };
+    // default date parameter
+    if (typeof d === 'undefined'){
+        d = new Date();
+    };
 
-                // return ISO datetime
-                return d.getFullYear() + '-' +
-                    s(d.getMonth()+1,2) + '-' +
-                    s(d.getDate(),2) + ' ' +
-                    s(d.getHours(),2) + ':' +
-                    s(d.getMinutes(),2);
-              }
-          
-      
-              // jQuery = jQuery.noConflict(true); 
-              function replot(a_begin, a_end, a_width, a_height){
-                  var begin = a_begin || $('#begin').data('datetimepicker').getDate();
-                  var end =   a_end || $('#end').data('datetimepicker').getDate();
-                  
-                  
-                  firstdate = new Date(min_secs());
-                  if (begin < firstdate){
-                    begin = firstdate;
-                    $('#begin').data('datetimepicker').setLocalDate(begin);
-                  }
-                  
-                  // lastdate = new Date(max_secs());
-                  // if (end > lastdate){
-                  //   end = lastdate;
-                  //   $('#end').data('datetimepicker').setLocalDate(end);
-                  // }
-                  
-                  var width = parseInt(a_width || jQuery('#outerframe').width() , 10);
-                  var height = parseInt(a_height || jQuery( window).height() *0.7 , 10);
-                  var url = encodeURI('cgi/plotter.py?begin=' + getISODateTime(begin) +
-                                                      "&end="+getISODateTime(end) +
-                                                      "&width="+width+
-                                                      "&height="+height);
-                  jQuery('#svg1').attr('width',width+20);
-                  jQuery('#svg1').attr('height',height+20);
-                  jQuery('#svg1').attr('data',url);
-              }
-              
-              function text_input(d){
-                var nlabel = $(document.createElement( "label" ));
-                var nspan = $(document.createElement( "span" )).text(d['label']+ " :");
-                
-                
-                if (d['type'] == "largetxt"){
-                  var ninput = $(document.createElement( "textarea" ));
-                  ninput.text(d['value']);
-                }
-                else{
-                  var ninput = $(document.createElement( "input" ));
-                  ninput.attr("type", d['type']);
-                  ninput.val(d['value']);
-                }
-                
-                ninput.attr({'id' : d['key'], 
-                              'name' : d['key'],
-                              "placeholder" : d['defval'],
-                              "title" : d['description'],
-                            });
-                nlabel.append(nspan);
-                nlabel.append(ninput);
-                return nlabel;
-              }
-              
-              function intrange_input(d){
-                var nlabel = $(document.createElement( "label" ));
-                var nspan = $(document.createElement( "span" )).text(d['label']+ " :");
-                var nselect = $(document.createElement( "select" ));
-                nselect.attr({'id' : d['key'], 
-                              'name' : d['key'],
-                            });
-                for(var i = d['range'][0]; i < d['range'][1]; i++){
-                  var opt = $(document.createElement( "option"));
-                  opt.text(""+i);
-                  opt.val(""+i);
-                  if (i == d['value'])
-                    opt.prop('selected', true);
-                  nselect.append(opt);
-                }
-                nlabel.append(nspan);
-                nlabel.append(nselect);
-                return nlabel;
-              }
-              
-              function show_cfg(){
-                cfgdata = config_json();
-                
-                for (var i = 0; i < Object.keys(cfgdata).length; i++){
-                  var d = cfgdata[""+i];
-                  
-                  if (d['webconfigurable']){
-                    switch(d['type']) {
-                        case 'smalltxt':
-                          d['type'] = 'text';
-                        case 'email':
-                        case 'password':
-                        case 'largetxt':
-                            $("#cfgframe").append(text_input(d));
-                            break;
-                        case 'intrange':
-                          $("#cfgframe").append(intrange_input(d));
-                        default:
-                          break;
-                    }
-                  }
-                }
-                // $("#cfgframe").parent().parent().trigger("create");
-                
-                /*
-                <label>
-                  <span>Your Email :</span>
-                  <input id="email" type="email" name="email" placeholder="Valid Email Address">
-                </label>
-                
-                <label><span>Message :</span>
-                  <textarea id="message" name="message" placeholder="Your Message to Us"></textarea>
-                </label>*/
-              }
-              
-              function init(){
-                  var endtime = max_secs();
-                  var begintime = endtime - 60*60*1000 * default_begin();
-                  
-                  var options = {
-                      pickSeconds: false,
-                      format: 'yyyy-MM-dd hh:mm',
-                      endDate: new Date(max_secs()),
-                      startDate: new Date(min_secs()),
-                  }
-                  jQuery('#begin_val').attr("data-format", options['format']);
-                  jQuery('#end_val').attr("data-format", options['format']);
-                  jQuery('i').each(function(){
-                      jQuery(this).attr("data-time-icon","icon-time");
-                      jQuery(this).attr("data-date-icon","icon-calendar");
-                  });
-                  
-                  jQuery('#begin').datetimepicker(options);
-                  jQuery('#end').datetimepicker(options);
-                  
-                  var btime = new Date(begintime);
-                  var etime = new Date(endtime);
-                  jQuery('#begin').data('datetimepicker').setLocalDate(btime);
-                  jQuery('#end').data('datetimepicker').setLocalDate(etime);
-      
-                  jQuery( ".date" ).on( "changeDate", function(e) {
-                      jQuery.doTimeout( 'someid', 1200, function(){replot()}, true);
-                      });
-                      
-                  jQuery( window ).resize(function() {
-                      jQuery.doTimeout( 'resize', 1200, function(){replot()}, true);
-                      });
-                  replot();
-                  
-                  $( "#tabs1-data").find( "span" ).first().text(
-                                        "Datapoints from: "+ 
-                                        getISODateTime(new Date(min_secs()))+ " to: "+
-                                        getISODateTime(etime));
-                  show_cfg();
-              }
-              //]]>	
+    // return ISO datetime
+    return d.getFullYear() + '-' +
+        s(d.getMonth()+1,2) + '-' +
+        s(d.getDate(),2) + ' ' +
+        s(d.getHours(),2) + ':' +
+        s(d.getMinutes(),2);
+  }
+
+
+  function replot(a_begin, a_end, a_width, a_height){
+      var begin = a_begin || $('#begin').data('datetimepicker').getDate();
+      var end =   a_end || $('#end').data('datetimepicker').getDate();
+  
+  
+      var firstdate = new Date(min_secs());
+      if (begin < firstdate){
+        begin = firstdate;
+        $('#begin').data('datetimepicker').setLocalDate(begin);
+      }
+  
+      // lastdate = new Date(max_secs());
+      // if (end > lastdate){
+      //   end = lastdate;
+      //   $('#end').data('datetimepicker').setLocalDate(end);
+      // }
+  
+      var width = parseInt(a_width || $('#outerframe').width() , 10);
+      var height = parseInt(a_height || $( window).height() *0.7 , 10);
+      var url = encodeURI('cgi/plotter.py?begin=' + getISODateTime(begin) +
+                                          "&end="+getISODateTime(end) +
+                                          "&width="+width+
+                                          "&height="+height);
+                                          
+      return    { 'width' : width+20, 
+                  'height': height+20,
+                  'data':  url };
+  }
+
+  function text_input(d){
+    var nlabel = $(document.createElement( "label" ));
+    var nspan = $(document.createElement( "span" )).text(d['label']+ " :");
+
+
+    if (d['type'] == "largetxt"){
+      var ninput = $(document.createElement( "textarea" ));
+      ninput.text(d['value']);
+    }
+    else{
+      var ninput = $(document.createElement( "input" ));
+      ninput.attr("type", d['type']);
+      ninput.val(d['value']);
+    }
+
+    ninput.attr({'id' : d['key'], 
+                  'name' : d['key'],
+                  "placeholder" : d['defval'],
+                  "title" : d['description'],
+                });
+    nlabel.append(nspan);
+    nlabel.append(ninput);
+    return nlabel;
+  }
+
+  function intrange_input(d){
+    var nlabel = $(document.createElement( "label" ));
+    var nspan = $(document.createElement( "span" )).text(d['label']+ " :");
+    var nselect = $(document.createElement( "select" ));
+    nselect.attr({'id' : d['key'], 
+                  'name' : d['key'],
+                });
+    for(var i = d['range'][0]; i < d['range'][1]; i++){
+      var opt = $(document.createElement( "option"));
+      opt.text(""+i);
+      opt.val(""+i);
+      if (i == d['value'])
+        opt.prop('selected', true);
+      nselect.append(opt);
+    }
+    nlabel.append(nspan);
+    nlabel.append(nselect);
+    return nlabel;
+  }
+
+  function show_cfg(){
+    var cfgdata = config_json();
+
+    for (var i = 0; i < Object.keys(cfgdata).length; i++){
+      var d = cfgdata[""+i];
+  
+      if (d['webconfigurable']){
+        switch(d['type']) {
+            case 'smalltxt':
+              d['type'] = 'text';
+            case 'email':
+            case 'password':
+            case 'largetxt':
+                $("#cfgframe").append(text_input(d));
+                break;
+            case 'intrange':
+              $("#cfgframe").append(intrange_input(d));
+            default:
+              break;
+        }
+      }
+    }
+  }
+
+  function init(){
+      var endtime = max_secs();
+      var begintime = endtime - 60*60*1000 * default_begin();
+  
+      var options = {
+          pickSeconds: false,
+          format: 'yyyy-MM-dd hh:mm',
+          endDate: new Date(max_secs()),
+          startDate: new Date(min_secs()),
+      }
+      $('#begin_val').attr("data-format", options['format']);
+      $('#end_val').attr("data-format", options['format']);
+      $('i').each(function(){
+          $(this).attr("data-time-icon","icon-time");
+          $(this).attr("data-date-icon","icon-calendar");
+      });
+  
+      $('#begin').datetimepicker(options);
+      $('#end').datetimepicker(options);
+  
+      var btime = new Date(begintime);
+      var etime = new Date(endtime);
+      $('#begin').data('datetimepicker').setLocalDate(btime);
+      $('#end').data('datetimepicker').setLocalDate(etime);
+
+      $( ".date" ).on( "changeDate", function(e) {
+          $.doTimeout( 'someid', 1200, function(){
+              $('#svg1').attr(replot());}, true);
+          });
+
+      $( window ).resize(function() {
+          $.doTimeout( 'resize', 1200, function(){
+              $('#svg1').attr(replot());
+              }, true); 
+          });  
+      $( "#tabs1-data").find( "span" ).first().text(
+                            "Datapoints from: "+ 
+                            getISODateTime(new Date(min_secs()))+ " to: "+
+                            getISODateTime(etime));
+      show_cfg();      
+      var nsvg = $(document.createElement('object'));
+      nsvg.attr({"id":"svg1", "type":"image/svg+xml"});
+      nsvg.attr(replot());
+      $("#tabs1-data").append(nsvg);
+  }
+  //]]>	
     </script>
   </head>
   <body onload="init()">
@@ -261,7 +255,8 @@
               <i></i>
               </span>
             </div>
-            <object id="svg1" type="image/svg+xml"></object>
+<!--            <object id="svg1" type="image/svg+xml"></object> -->
+<!--data="cgi/plotter.py"-->
           </div>
           <div id="tabs1-cfg">
             <div class="white-pink">
@@ -269,33 +264,7 @@
                   <span>Further configuration options available in the rb_preserve.cfg file</span>
                 </h1>
                 <div id="cfgframe"> &nbsp;</div>
-<!--
-                <label>
-                  <span>Your Name :</span>
-                  <input id="name" type="text" name="name" placeholder="Your Full Name">
-                </label>
-                
-                <label>
-                  <span>Your Email :</span>
-                  <input id="email" type="email" name="email" placeholder="Valid Email Address">
-                </label>
-                
-                <label><span>Message :</span>
-                  <textarea id="message" name="message" placeholder="Your Message to Us"></textarea>
-                </label>
-                
-                <label>
-                  <span>Subject :</span>
-                  <select name="selection">
-                    <option value="Job Inquiry">
-                        Job Inquiry
-                    </option>
-                    <option value="General Question">
-                        General Question
-                    </option>
-                  </select>
-                </label>
--->                  
+
                 <label>
                   <span>&nbsp;</span>
                   <input type="button" class="button" value="Apply">
