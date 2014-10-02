@@ -204,6 +204,12 @@ function getISODateTime(d){
       var etime = new Date(endtime);
       $('#begin').data('datetimepicker').setLocalDate(btime);
       $('#end').data('datetimepicker').setLocalDate(etime);
+      
+      show_cfg();      
+      var nsvg = $(document.createElement('object'));
+      nsvg.attr({"id":"svg1", "type":"image/svg+xml"});
+      nsvg.attr(replot());
+      $("#tabs1-data").append(nsvg);
 
       $( ".date" ).on( "changeDate", function(e) {
           $.doTimeout( 'someid', 1200, function(){
@@ -219,11 +225,6 @@ function getISODateTime(d){
                             "Datapoints from: "+ 
                             getISODateTime(new Date(min_secs()))+ " to: "+
                             getISODateTime(etime));
-      show_cfg();      
-      var nsvg = $(document.createElement('object'));
-      nsvg.attr({"id":"svg1", "type":"image/svg+xml"});
-      nsvg.attr(replot());
-      $("#tabs1-data").append(nsvg);
   }
   //]]>	
     </script>
