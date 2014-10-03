@@ -55,7 +55,6 @@ def webreq(form):
     getvals['begin'] = tbegin
     getvals['end'] = tend
 
-  print getvals['begin'], getvals['end'], 
   return plot.draw_svg(getvals['begin'], getvals['end'], 
                       int(getvals['width']), int(getvals['height']))
 

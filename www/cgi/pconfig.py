@@ -155,9 +155,6 @@ def json_out():
     outup[i] = de
   return outup
     
-def parse_json():
-    pass
-
 
 def read(fname):
   dflts = {}

@@ -19,6 +19,10 @@ import glob
 import math
 import os
 
+from calendar import monthrange
+from datetime import datetime, timedelta
+
+
 def data_span(tformat):
     dfiles = sorted(glob.glob("./data/*.data"))
     
@@ -33,7 +37,16 @@ def data_span(tformat):
     return (first, last)
 
 def filerange(begin, end):
-    return ["2014-09.data", "2014-10.data"]
+  
+  ltb =  datetime.fromtimestamp(begin)
+  lte =  datetime.fromtimestamp(end)
+  output = []
+  
+  while ltb < lte:
+    output.append("%s.data" % ltb.strftime(pconfig.dfilename_fmt()))
+    mdays = monthrange(ltb.year, ltb.month)[1]
+    ltb += timedelta(days=mdays)
+  return output
 
 def data_stride(begin, end, max_points, sample_interval):
     stride = math.floor(((end - begin) / sample_interval)/max_points)
@@ -43,6 +56,18 @@ def data_stride(begin, end, max_points, sample_interval):
 def _l2secs(line, tformat):
     tl = line.split(',')[0]
     return time.mktime(time.strptime(tl, tformat))
+    
+    
+def find_interval(boffset, eoffset,flines ,tformat, begin, end, sample_interval):
+  begin_off  = _l2secs(flines[boffset], tformat)
+  begin_off = int(( begin- begin_off) / sample_interval)
+  begin_off = begin_off if begin_off > 0 else 0
+  end_off  = _l2secs(flines[-eoffset], tformat)
+  end_off = int((end_off - end) / sample_interval)
+  end_off = -end_off if end_off > 0 else len(flines)
+  
+  return (begin_off,end_off)
+  
 
 def get_lines(begin, end, tformat, max_points, sample_interval):
     lines = []
@@ -51,20 +76,28 @@ def get_lines(begin, end, tformat, max_points, sample_interval):
         with open("data/%s"% fn, 'r') as f:
             flines = f.readlines()
         if len(flines)> 0:
-            # begin_off  = _l2secs(flines[0], tformat)
-            # begin_off = int(( begin- begin_off) / sample_interval)
-            # begin_off = begin_off if begin_off > 0 else 0
-            # end_off  = _l2secs(flines[-1], tformat)
-            # end_off = int((end_off - end) / sample_interval)
-            # end_off = -end_off if end_off > 0 else len(flines)
-            # lines.extend(flines[begin_off:end_off:stride])
-            for l in flines[::stride]:
-                try:
-                    ts = _l2secs(l, tformat)
-                    if ts > begin and ts < end:
-                        lines.append(l)
-                except:
-                    continue
+            begin_off, end_off = find_interval(0, 1, flines,tformat, begin, end, sample_interval)
+                        
+            if begin_off < 0 or begin_off > len(flines):
+              begin_off = 0
+            else:
+                while _l2secs(flines[begin_off], tformat) > begin and begin_off > 0:
+                  begin_off-=1
+                begin_off+=1
+
+            if end_off < 0:
+              while _l2secs(flines[end_off], tformat) <= end and end_off > -len(flines):
+                end_off-= 1
+              end_off-=1
+            
+            lines.extend(flines[begin_off:end_off:stride])
+            # for l in flines[begin_off:end_off:stride]:
+            #     try:
+            #         ts = _l2secs(l, tformat)
+            #         if ts > begin and ts < end:
+            #             lines.append(l)
+            #     except:
+            #         continue
     # print len(lines), stride, begin_off, end_off
     return lines
 
