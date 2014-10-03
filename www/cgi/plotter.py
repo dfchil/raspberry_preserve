@@ -6,7 +6,6 @@ import cgi, cgitb
 import plot
 import pconfig
 import time
-from flup.server.fcgi import WSGIServer
 
 def cond_read(strnme, alt, form):
     outp = form.getvalue(strnme)
