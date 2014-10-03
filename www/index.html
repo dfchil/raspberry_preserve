@@ -58,7 +58,7 @@
     <script type="text/javascript">
 //<![CDATA[
 
-function getISODateTime(d){
+  function getISODateTime(d){
     // padding function
     var s = function(a,b){return(1e15+a+"").slice(-b)};
 
@@ -74,7 +74,6 @@ function getISODateTime(d){
         s(d.getHours(),2) + ':' +
         s(d.getMinutes(),2);
   }
-
 
   function replot(a_begin, a_end, a_width, a_height){
       var begin = a_begin || $('#begin').data('datetimepicker').getDate();
@@ -182,19 +181,6 @@ function getISODateTime(d){
         }
       }
     }
-    /*
-
-        <h1>System Configuration
-          <span>Further configuration options available in the rb_preserve.cfg file</span>
-        </h1>
-        <div id="cfgframe"> &nbsp;</div>
-
-        <label>
-          <span>&nbsp;</span>
-          <input type="button" class="button" value="Apply">
-        </label>
-    </div>*/
-    
     
     ncfg.append(document.createElement('label'));
     ncfg.first().append(document.createElement('span'));
@@ -244,7 +230,7 @@ function getISODateTime(d){
           $.doTimeout( 'resize', 1200, function(){
               $('#svg1').attr(replot());
               }, true); 
-          });  
+          });
       $( "#tabs1-data").find( "span" ).first().text(
                             "Datapoints from: "+ 
                             getISODateTime(new Date(min_secs()))+ " to: "+
