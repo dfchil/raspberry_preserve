@@ -46,6 +46,10 @@ def filerange(begin, end):
     output.append("%s.data" % ltb.strftime(pconfig.dfilename_fmt()))
     mdays = monthrange(ltb.year, ltb.month)[1]
     ltb += timedelta(days=mdays)
+    
+  if "%s.data" % lte.strftime(pconfig.dfilename_fmt()) not in output:
+    output.append("%s.data" % lte.strftime(pconfig.dfilename_fmt()))
+  
   return output
 
 def data_stride(begin, end, max_points, sample_interval):
@@ -89,16 +93,8 @@ def get_lines(begin, end, tformat, max_points, sample_interval):
               while _l2secs(flines[end_off], tformat) <= end and end_off > -len(flines):
                 end_off-= 1
               end_off-=1
-            
+
             lines.extend(flines[begin_off:end_off:stride])
-            # for l in flines[begin_off:end_off:stride]:
-            #     try:
-            #         ts = _l2secs(l, tformat)
-            #         if ts > begin and ts < end:
-            #             lines.append(l)
-            #     except:
-            #         continue
-    # print len(lines), stride, begin_off, end_off
     return lines
 
 
