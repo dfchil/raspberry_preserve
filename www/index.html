@@ -76,11 +76,11 @@
   }
 
   function replot(a_begin, a_end, a_width, a_height){
-      var begin = a_begin || $('#begin').data('datetimepicker').getDate();
-      var end =   a_end || $('#end').data('datetimepicker').getDate();
+      var begin = a_begin || $('#begin').data('datetimepicker').getLocalDate();
+      var end =   a_end || $('#end').data('datetimepicker').getLocalDate();
   
   
-      var firstdate = new Date(min_secs());
+      var firstdate = new Date(min_secs()+ begin.getTimezoneOffset());
       if (begin < firstdate){
         begin = firstdate;
         $('#begin').data('datetimepicker').setLocalDate(begin);
@@ -91,7 +91,7 @@
       //   end = lastdate;
       //   $('#end').data('datetimepicker').setLocalDate(end);
       // }
-  
+      debugger;
       var width = parseInt(a_width || $('#outerframe').width() , 10);
       var height = parseInt(a_height || $( window).height() *0.7 , 10);
       var url = encodeURI('cgi/plotter.py?begin=' + getISODateTime(begin) +
@@ -192,6 +192,8 @@
   }
 
   function init(){
+    
+    debugger;
       var endtime = max_secs();
       var begintime = endtime - 60*60*1000 * default_begin();
   

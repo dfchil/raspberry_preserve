@@ -39,14 +39,14 @@ def webreq(form):
     getvals['end'] = tend
 
   try:
-    getvals['begin'] = time.mktime(time.strptime(getvals['begin'], timeformat))
+    getvals['begin'] = time.mktime(time.strptime(getvals['begin'], timeformat)) 
   except:
     getvals['begin'] = tbegin
 
   if getvals['end'] > tend:
     getvals['end'] = tend
 
-  firstvalue, lastvalue =plot.data_span(timeformat)
+  firstvalue, lastvalue = plot.data_span(timeformat)
   if getvals['begin'] < firstvalue:
     getvals['begin'] = firstvalue
 
@@ -55,11 +55,12 @@ def webreq(form):
     getvals['begin'] = tbegin
     getvals['end'] = tend
 
+  print getvals['begin'], getvals['end'], 
   return plot.draw_svg(getvals['begin'], getvals['end'], 
                       int(getvals['width']), int(getvals['height']))
 
 if __name__ == "__main__":
-  form = cgi.FieldStorage(environ=env)
+  form = cgi.FieldStorage()
   print "Content-type:text/html\r\n\r\n"
   print webreq(form)
   

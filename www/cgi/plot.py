@@ -35,8 +35,8 @@ def data_span(tformat):
 def filerange(begin, end):
     return ["2014-09.data", "2014-10.data"]
 
-def data_stride(begin, end, num_points, sample_interval):
-    stride = math.floor(((end - begin) / sample_interval)/num_points)
+def data_stride(begin, end, max_points, sample_interval):
+    stride = math.floor(((end - begin) / sample_interval)/max_points)
     stride = 1 if stride < 1 else stride
     return int(stride)
 
@@ -44,27 +44,27 @@ def _l2secs(line, tformat):
     tl = line.split(',')[0]
     return time.mktime(time.strptime(tl, tformat))
 
-def get_lines(begin, end, tformat, max_data_points, sample_interval):
+def get_lines(begin, end, tformat, max_points, sample_interval):
     lines = []
-    stride = data_stride(begin, end, max_data_points, sample_interval)
+    stride = data_stride(begin, end, max_points, sample_interval)
     for fn in filerange(begin, end):
         with open("data/%s"% fn, 'r') as f:
             flines = f.readlines()
         if len(flines)> 0:
-            begin_off  = _l2secs(flines[0], tformat)
-            begin_off = int(( begin- begin_off) / sample_interval)
-            begin_off = begin_off if begin_off > 0 else 0
-            end_off  = _l2secs(flines[-1], tformat)
-            end_off = int((end_off - end) / sample_interval)
-            end_off = -end_off if end_off > 0 else len(flines)
-            lines.extend(flines[begin_off:end_off:stride])
-            # for l in flines[begin_off:end_off:stride]:
-            #     try:
-            #         ts = _l2secs(l, tformat)
-            #         if ts > begin and ts < end:
-            #             lines.append(l)
-            #     except:
-            #         continue
+            # begin_off  = _l2secs(flines[0], tformat)
+            # begin_off = int(( begin- begin_off) / sample_interval)
+            # begin_off = begin_off if begin_off > 0 else 0
+            # end_off  = _l2secs(flines[-1], tformat)
+            # end_off = int((end_off - end) / sample_interval)
+            # end_off = -end_off if end_off > 0 else len(flines)
+            # lines.extend(flines[begin_off:end_off:stride])
+            for l in flines[::stride]:
+                try:
+                    ts = _l2secs(l, tformat)
+                    if ts > begin and ts < end:
+                        lines.append(l)
+                except:
+                    continue
     # print len(lines), stride, begin_off, end_off
     return lines
 
