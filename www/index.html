@@ -222,12 +222,13 @@
       $("#tabs1-data").append(nsvg);
 
       $( ".date" ).on( "changeDate", function(e) {
-          $.doTimeout( 'someid', 1200, function(){
-              $('#svg1').attr(replot());}, true);
+          $.doTimeout( 'someid', 300, function(){
+              $('#svg1').attr(replot())
+              ;}, true);
           });
 
       $( window ).resize(function() {
-          $.doTimeout( 'resize', 1200, function(){
+          $.doTimeout( 'resize', 300, function(){
               $('#svg1').attr(replot());
               }, true); 
           });

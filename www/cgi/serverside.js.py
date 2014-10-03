@@ -5,14 +5,11 @@ import plot
 import pconfig
 import json
 
-
-if __name__ == "__main__":
-    
+def webreq():
     cfg = pconfig.read('rb_preserve.cfg')
     first_value, last_value = plot.data_span(cfg.get('settings', 'timeformat'))
     
-    print """Content-Type: application/javascript
-
+    return """
 function min_secs(){
     return %f;
 }
