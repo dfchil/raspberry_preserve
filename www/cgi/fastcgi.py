@@ -8,7 +8,7 @@ import sys, os
 from flup.server.fcgi import WSGIServer
 
 import plotter
-import serv_js
+import serverside_js
 
 def app(env, start_response):
     if env['SCRIPT_NAME'] == "/cgi/plotter.py":
@@ -16,9 +16,9 @@ def app(env, start_response):
       form = cgi.FieldStorage(environ=env)
       yield plotter.webreq(form)
 
-    elif env['SCRIPT_NAME'] == "/cgi/serverside.js.py":
+    elif env['SCRIPT_NAME'] == "/cgi/serverside_js.py":
       start_response('200 OK', [('Content-Type', 'application/javascript')])
-      yield serv_js.webreq()
+      yield serverside_js.webreq()
 
     else:
       start_response('200 OK', [('Content-Type', 'text/html')])

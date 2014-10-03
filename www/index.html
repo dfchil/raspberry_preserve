@@ -91,7 +91,7 @@
       //   end = lastdate;
       //   $('#end').data('datetimepicker').setLocalDate(end);
       // }
-      debugger;
+      
       var width = parseInt(a_width || $('#outerframe').width() , 10);
       var height = parseInt(a_height || $( window).height() *0.7 , 10);
       var url = encodeURI('cgi/plotter.py?begin=' + getISODateTime(begin) +
@@ -192,8 +192,6 @@
   }
 
   function init(){
-    
-    debugger;
       var endtime = max_secs();
       var begintime = endtime - 60*60*1000 * default_begin();
   
@@ -281,6 +279,6 @@
       </div>
 	  </div>
     </div>
-    <script type="text/javascript" src="cgi/serverside.js.py"></script>
+    <script type="text/javascript" src="cgi/serverside_js.py"></script>
   </body>
 </html>
