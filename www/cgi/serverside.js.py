@@ -31,4 +31,5 @@ function config_json(){
 
 
 if __name__ == "__main__":
-  print webreq()
+    print "Content-type:application/javascript\r\n\r\n"
+    print webreq()
