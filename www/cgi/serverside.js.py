@@ -28,3 +28,7 @@ function config_json(){
 """ % (first_value *1000, last_value *1000,
     int(cfg.get('settings', 'default_view_hours')),
     json.dumps(pconfig.json_out()))
+
+
+if __name__ == "__main__":
+  print webreq()
