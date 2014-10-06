@@ -93,7 +93,7 @@ def get_lines(begin, end, max_points, sample_interval):
     stride = len(lines)/max_points
     stride = 1 if stride < 1 else int(stride)
     
-    print stride, max_points, len(lines)
+    # print stride, max_points, len(lines)
 
     return lines[::stride]
 
