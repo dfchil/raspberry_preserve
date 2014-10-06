@@ -18,7 +18,7 @@ def webreq(form):
   tend =   int(time.time())
   tbegin = tend - 60*60*int(cfg.get('settings', 'default_view_hours'))
 
-  timeformat = cfg.get('settings', 'timeformat')
+  timeformat = pconfig.dformat()
 
   getvals = {
     'begin': time.strftime(timeformat, time.localtime(tbegin)),
