@@ -85,13 +85,7 @@
         begin = firstdate;
         $('#begin').data('datetimepicker').setLocalDate(begin);
       }
-  
-      // lastdate = new Date(max_secs());
-      // if (end > lastdate){
-      //   end = lastdate;
-      //   $('#end').data('datetimepicker').setLocalDate(end);
-      // }
-      
+        
       var width = parseInt(a_width || $('#outerframe').width() , 10);
       var height = parseInt(a_height || $( window).height() *0.7 , 10);
       var url = encodeURI('cgi/plotter.py?begin=' + getISODateTime(begin) +
@@ -270,11 +264,8 @@
               <i></i>
               </span>
             </div>
-<!--            <object id="svg1" type="image/svg+xml"></object> -->
-<!--data="cgi/plotter.py"-->
           </div>
           <div id="tabs1-cfg">
-              <!-- <div class="white-pink"> &nbsp;</div> -->
           </div>
       </div>
 	  </div>

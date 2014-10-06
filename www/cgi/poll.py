@@ -90,7 +90,7 @@ def main(argv=None):
     cfg = pconfig.read('rb_preserve.cfg')
 
     ddir = cfg.get('settings', 'data_dir')
-    timeformat = cfg.get('settings', 'timeformat')
+    timeformat = pconfig.dformat();
     pwd = os.path.dirname(os.path.realpath(__file__))
     
     #sample sensor

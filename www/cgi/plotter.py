@@ -11,9 +11,7 @@ def cond_read(strnme, alt, form):
     outp = form.getvalue(strnme)
     return outp if outp != None else alt
 
-  
 def webreq(form):
-    
   cfg = pconfig.read('rb_preserve.cfg')
 
   #default time is past 24 hours
@@ -46,7 +44,7 @@ def webreq(form):
   if getvals['end'] > tend:
     getvals['end'] = tend
 
-  firstvalue, lastvalue = plot.data_span(timeformat)
+  firstvalue, lastvalue = plot.data_span()
   if getvals['begin'] < firstvalue:
     getvals['begin'] = firstvalue
 
@@ -62,4 +60,4 @@ if __name__ == "__main__":
   form = cgi.FieldStorage()
   print "Content-type:text/html\r\n\r\n"
   print webreq(form)
-  
+

@@ -22,8 +22,14 @@ import os
 from calendar import monthrange
 from datetime import datetime, timedelta
 
+from bisect import bisect_left, bisect_right
 
-def data_span(tformat):
+
+def _l2secs(line):
+    tl = line.split(',')[0]
+    return time.mktime(time.strptime(tl, pconfig.dformat()))
+
+def data_span():
     dfiles = sorted(glob.glob("./data/*.data"))
     
     first = time.time()
@@ -31,25 +37,22 @@ def data_span(tformat):
 
     if len(dfiles):
         with open(dfiles[0]) as ffile:
-            first = _l2secs(ffile.readline(), tformat)
+            first = _l2secs(ffile.readline())
             
-        last = _l2secs(check_output(["tail", "-n", "1", dfiles[-1]]), tformat)
+        last = _l2secs(check_output(["tail", "-n", "1", dfiles[-1]]))
     return (first, last)
 
 def filerange(begin, end):
-  
   ltb =  datetime.fromtimestamp(begin)
+  ltb =datetime(ltb.year, ltb.month, 1, 0, 0)
   lte =  datetime.fromtimestamp(end)
   output = []
-  
+
   while ltb < lte:
     output.append("%s.data" % ltb.strftime(pconfig.dfilename_fmt()))
     mdays = monthrange(ltb.year, ltb.month)[1]
     ltb += timedelta(days=mdays)
-    
-  if "%s.data" % lte.strftime(pconfig.dfilename_fmt()) not in output:
-    output.append("%s.data" % lte.strftime(pconfig.dfilename_fmt()))
-  
+      
   return output
 
 def data_stride(begin, end, max_points, sample_interval):
@@ -57,54 +60,52 @@ def data_stride(begin, end, max_points, sample_interval):
     stride = 1 if stride < 1 else stride
     return int(stride)
 
-def _l2secs(line, tformat):
-    tl = line.split(',')[0]
-    return time.mktime(time.strptime(tl, tformat))
-    
-    
-def find_interval(boffset, eoffset,flines ,tformat, begin, end, sample_interval):
-  begin_off  = _l2secs(flines[boffset], tformat)
-  begin_off = int(( begin- begin_off) / sample_interval)
-  begin_off = begin_off if begin_off > 0 else 0
-  end_off  = _l2secs(flines[-eoffset], tformat)
-  end_off = int((end_off - end) / sample_interval)
-  end_off = -end_off if end_off > 0 else len(flines)
-  
-  return (begin_off,end_off)
-  
 
-def get_lines(begin, end, tformat, max_points, sample_interval):
+def binary_search(bfun,  seekval, lines, low = 0, high=None):
+    seekval = "%s,%.2f,%.02f\n" % (time.strftime(pconfig.dformat(), time.localtime(seekval)), 0.0, 0.0)
+    high = high if high is not None else len(lines)
+    
+    pos = bfun(lines, seekval, low, high)
+    pos = (pos if pos != high else high -1)
+
+    return pos 
+
+def get_lines(begin, end, max_points, sample_interval):
     lines = []
-    stride = data_stride(begin, end, max_points, sample_interval)
-    for fn in filerange(begin, end):
-        with open("data/%s"% fn, 'r') as f:
+    # stride = data_stride(begin, end, max_points, sample_interval)
+    
+    fr = filerange(begin, end)
+    for i in range(len(fr)):
+        with open("data/%s"% fr[i], 'r') as f:
             flines = f.readlines()
         if len(flines)> 0:
-            begin_off, end_off = find_interval(0, 1, flines,tformat, begin, end, sample_interval)
-                        
-            if begin_off < 0 or begin_off > len(flines):
-              begin_off = 0
-            else:
-                while _l2secs(flines[begin_off], tformat) > begin and begin_off > 0:
-                  begin_off-=1
-                begin_off+=1
+            boff = 0
+            toff = len(flines) -1
 
-            if end_off < 0:
-              while _l2secs(flines[end_off], tformat) <= end and end_off > -len(flines):
-                end_off-= 1
-              end_off-=1
+        if i == 0:
+            boff = binary_search(bisect_left, begin, flines)
 
-            lines.extend(flines[begin_off:end_off:stride])
-    return lines
+        if i+1 == len(fr):
+            toff = binary_search(bisect_right, end, flines)
+
+        lines.extend(flines[boff:toff])
+    
+    stride = len(lines)/max_points
+    stride = 1 if stride < 1 else int(stride)
+    
+    print stride, max_points, len(lines)
+
+    return lines[::stride]
 
 
 def write_gpcfg(width, height, uid_fbase, cfg):
     
-    timeformat = cfg.get('settings', 'timeformat')
+    timeformat =  pconfig.dformat()
     hmin = float(cfg.get('settings', 'humidity_min'))
     hmax = float(cfg.get('settings', 'humidity_max'))
     tmax = float(cfg.get('settings', 'temperature_max'))
     
+    #set format x "%%d/%%m\n%%H:%%M"
     gpcfg = """
     set terminal svg size %d,%d dashed linewidth 0.7
     #set output '%s.svg'
@@ -126,7 +127,7 @@ def write_gpcfg(width, height, uid_fbase, cfg):
     set y2tics 1 nomirror tc rgb "red"
     set y2label 'Temperature'  tc rgb "red"
 
-    plot '%s.data' \
+    plot '%s.tdata' \
         using 1:2 with lines lt 1 linecolor rgb "blue" title 'Humidity %%', \
     ''  using 1:3 with lines lt 1 linecolor rgb "red" title 'Degrees Celsius' axes x1y2 , \
     	%f  with lines lt 3 linecolor rgb "blue" title "Humidity limits", \
@@ -148,11 +149,10 @@ def draw_svg(begin, end, width, height):
     uid_fbase =  "%s/%s" % (cfg.get('settings', 'tmp_dir') ,str(uuid.uuid4()))
 
     #write data file
-    with open("%s.data" % uid_fbase, "w") as dfo:
+    with open("%s.tdata" % uid_fbase, "w") as dfo:
         dfo.write("".join(get_lines(begin, end, 
-                          cfg.get('settings', 'timeformat'), 
-                          int(cfg.get('settings', 'max_plot_points')),
-                          int(cfg.get('settings', 'sample_period'))*60)))
+                        int(cfg.get('settings', 'max_plot_points')),
+                        int(cfg.get('settings', 'sample_period'))*60)))
     #write gnuplot cfg file
     write_gpcfg(width, height, uid_fbase, cfg)
     
@@ -161,6 +161,6 @@ def draw_svg(begin, end, width, height):
 
     #clean up tmp files
     os.remove("%s.gp" % uid_fbase)
-    os.remove("%s.data" % uid_fbase)
+    os.remove("%s.tdata" % uid_fbase)
 
     return outp
