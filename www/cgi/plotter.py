@@ -18,12 +18,12 @@ def webreq(form):
   firstvalue, lastvalue = plot.data_span()
   
   tend =   lastvalue
-  tbegin = tend - 60*60*int(cfg.get('settings', 'default_view_hours'))
+  deftimeview = 60*60*int(cfg.get('settings', 'default_view_hours'))
 
   timeformat = pconfig.dformat()
 
   getvals = {
-    'begin': time.strftime(timeformat, time.localtime(tbegin)),
+    'begin': time.strftime(timeformat, time.localtime(tend - deftimeview)),
     'end': time.strftime(timeformat, time.localtime(tend)),
     'width': 960,
     'height' : 720,
@@ -42,24 +42,31 @@ def webreq(form):
   try:
     getvals['begin'] = time.mktime(time.strptime(getvals['begin'], timeformat)) 
   except:
-    getvals['begin'] = tbegin
-
-  if getvals['end'] > tend:
-    getvals['end'] = tend
-  elif getvals['end'] <= firstvalue:
-       getvals['end'] = firstvalue
-
-  # test that begin is before end
-  if getvals['begin'] >= getvals['end']:
-      if getvals['origin'] == "end":
-         getvals['begin'] = getvals['end'] - 60*60*int(cfg.get('settings', 'default_view_hours'))
-      else:
-        getvals['end'] = getvals['begin'] + 60*60*int(cfg.get('settings', 'default_view_hours'))
+    getvals['begin'] = tend - deftimeview
 
   if getvals['end'] > lastvalue:
     getvals['end'] = lastvalue
   if getvals['begin'] < firstvalue:
     getvals['begin'] = firstvalue
+    
+  # test that begin is before end
+  if getvals['begin'] >= getvals['end']:
+      if getvals['origin'] == "end":
+        getvals['begin'] = getvals['end'] - deftimeview
+      elif getvals['end'] >= tend:
+        getvals['begin'] = tend - deftimeview
+        getvals['end'] = tend
+      else:
+        getvals['end'] = getvals['begin'] + deftimeview
+  if getvals['end'] >= tend:
+    getvals['end'] = tend
+  elif getvals['end'] <= firstvalue:
+    getvals['end'] = firstvalue + deftimeview
+    getvals['begin'] = firstvalue
+    
+    
+
+
 
   return plot.draw_svg(getvals['begin'], getvals['end'], 
                       int(getvals['width']), int(getvals['height'])).replace("</svg>","""
