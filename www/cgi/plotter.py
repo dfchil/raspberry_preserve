@@ -44,10 +44,6 @@ def webreq(form):
   except:
     getvals['begin'] = tend - deftimeview
 
-  if getvals['end'] > lastvalue:
-    getvals['end'] = lastvalue
-  if getvals['begin'] < firstvalue:
-    getvals['begin'] = firstvalue
     
   # test that begin is before end
   if getvals['begin'] >= getvals['end']:
@@ -58,13 +54,15 @@ def webreq(form):
         getvals['end'] = tend
       else:
         getvals['end'] = getvals['begin'] + deftimeview
+
   if getvals['end'] >= tend:
     getvals['end'] = tend
   elif getvals['end'] <= firstvalue:
     getvals['end'] = firstvalue + deftimeview
     getvals['begin'] = firstvalue
     
-    
+  if getvals['begin'] < firstvalue:
+    getvals['begin'] = firstvalue
 
 
 
