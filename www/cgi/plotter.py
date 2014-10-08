@@ -15,7 +15,9 @@ def webreq(form):
   cfg = pconfig.read('rb_preserve.cfg')
 
   #default time is past 24 hours
-  tend =   int(time.time())
+  firstvalue, lastvalue = plot.data_span()
+  
+  tend =   lastvalue
   tbegin = tend - 60*60*int(cfg.get('settings', 'default_view_hours'))
 
   timeformat = pconfig.dformat()
@@ -24,7 +26,8 @@ def webreq(form):
     'begin': time.strftime(timeformat, time.localtime(tbegin)),
     'end': time.strftime(timeformat, time.localtime(tend)),
     'width': 960,
-    'height' : 720
+    'height' : 720,
+    'origin' : ""
   }
 
   for k,v in getvals.iteritems():
@@ -43,18 +46,30 @@ def webreq(form):
 
   if getvals['end'] > tend:
     getvals['end'] = tend
+  elif getvals['end'] <= firstvalue:
+       getvals['end'] = firstvalue
 
-  firstvalue, lastvalue = plot.data_span()
+  # test that begin is before end
+  if getvals['begin'] >= getvals['end']:
+      if getvals['origin'] == "end":
+         getvals['begin'] = getvals['end'] - 60*60*int(cfg.get('settings', 'default_view_hours'))
+      else:
+        getvals['end'] = getvals['begin'] + 60*60*int(cfg.get('settings', 'default_view_hours'))
+
+  if getvals['end'] > lastvalue:
+    getvals['end'] = lastvalue
   if getvals['begin'] < firstvalue:
     getvals['begin'] = firstvalue
 
-  # test that begin is before  begin
-  if getvals['begin'] > getvals['end']:
-    getvals['begin'] = tbegin
-    getvals['end'] = tend
-
   return plot.draw_svg(getvals['begin'], getvals['end'], 
-                      int(getvals['width']), int(getvals['height']))
+                      int(getvals['width']), int(getvals['height'])).replace("</svg>","""
+  <script type="text/javascript">
+    top.max_secs = function(){return %f;};
+    top.show_range();
+    top.set_time_pickers(%f, %f);
+  </script>
+</svg>""" % (lastvalue *1000, getvals['begin']*1000, getvals['end']*1000))
+#                     
 
 if __name__ == "__main__":
   form = cgi.FieldStorage()

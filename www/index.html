@@ -51,12 +51,10 @@
       }
     </style>
     <script type="text/javascript">
-      $(document).ready( function() {
-        $('#tab-container').easytabs();
-      });
-    </script>
-    <script type="text/javascript">
 //<![CDATA[
+  $(document).ready( function() {
+    $('#tab-container').easytabs();
+  });
 
   function getISODateTime(d){
     // padding function
@@ -75,7 +73,8 @@
         s(d.getMinutes(),2);
   }
 
-  function replot(a_begin, a_end, a_width, a_height){
+  function replot(a_origin, a_begin, a_end, a_width, a_height){
+      var origin = a_origin ? "&origin="+a_origin : "" ;
       var begin = a_begin || $('#begin').data('datetimepicker').getLocalDate();
       var end =   a_end || $('#end').data('datetimepicker').getLocalDate();
   
@@ -83,7 +82,6 @@
       var firstdate = new Date(min_secs()+ begin.getTimezoneOffset());
       if (begin < firstdate){
         begin = firstdate;
-        $('#begin').data('datetimepicker').setLocalDate(begin);
       }
         
       var width = parseInt(a_width || $('#outerframe').width() , 10);
@@ -91,11 +89,17 @@
       var url = encodeURI('cgi/plotter.py?begin=' + getISODateTime(begin) +
                                           "&end="+getISODateTime(end) +
                                           "&width="+width+
-                                          "&height="+height);
+                                          "&height="+height+
+                                          origin);
                                           
-      return    { 'width' : width+20, 
+      var nsvg = $(document.createElement('object'));
+      nsvg.attr({ "id":"svg1", 
+                  "type":"image/svg+xml",
+                  'width' : width+20, 
                   'height': height+20,
-                  'data':  url };
+                  'data':  url });
+      // $("#tabs1-data").append(nsvg);
+      $('#svg1').replaceWith(nsvg);
   }
 
   function text_input(d){
@@ -184,6 +188,19 @@
     
     
   }
+  function show_range(){
+    $( "#tabs1-data").find( "span" ).first().text(
+                          "Datapoints from: "+ 
+                          getISODateTime(new Date(min_secs()))+ " to: "+
+                          getISODateTime(new Date(max_secs())));
+  }
+
+
+  function  set_time_pickers(begintime, endtime){
+    $('#begin').data('datetimepicker').setLocalDate(new Date(begintime));
+    $('#end').data('datetimepicker').setLocalDate(new Date(endtime));    
+    // top.$.doTimeout('svgreload'); // cancel onchange
+  }
 
   function init(){
       var endtime = max_secs();
@@ -204,35 +221,22 @@
   
       $('#begin').datetimepicker(options);
       $('#end').datetimepicker(options);
-  
-      var btime = new Date(begintime);
-      var etime = new Date(endtime);
-      $('#begin').data('datetimepicker').setLocalDate(btime);
-      $('#end').data('datetimepicker').setLocalDate(etime);
-      
-      var nsvg = $(document.createElement('object'));
-      nsvg.attr({"id":"svg1", "type":"image/svg+xml"});
-      nsvg.attr(replot());
-      $("#tabs1-data").append(nsvg);
 
-      $( ".date" ).on( "changeDate", function(e) {
-          $.doTimeout( 'someid', 300, function(){
-              $('#svg1').attr(replot())
-              ;}, true);
+      set_time_pickers(begintime, endtime);
+
+      $( ".date" ).on( "changeDate", function(tevent) {
+          $.doTimeout( 'svgreload', 300, function(){
+             tevent = tevent || window.event;
+              replot(tevent.target.id);}, true);
           });
 
       $( window ).resize(function() {
-          $.doTimeout( 'resize', 300, function(){
-              $('#svg1').attr(replot());
+          $.doTimeout( 'svgreload', 300, function(){
+              replot();
               }, true); 
           });
-      $( "#tabs1-data").find( "span" ).first().text(
-                            "Datapoints from: "+ 
-                            getISODateTime(new Date(min_secs()))+ " to: "+
-                            getISODateTime(etime));
-
-    show_cfg();    
-
+    show_cfg();
+    replot();
   }
   //]]>	
     </script>
@@ -264,6 +268,7 @@
               <i></i>
               </span>
             </div>
+            <object id="svg1"></object>
           </div>
           <div id="tabs1-cfg">
           </div>
