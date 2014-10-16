@@ -5,11 +5,11 @@ import ConfigParser
 import os
 import json
 import cgi
-
+import stat
 
 def field_setup():
     return [
-        { 'key': "node_name",
+        {   'key': "node_name",
             'defval': "",
             'label' : "Node Name",
             "type" : "smalltxt",
@@ -17,7 +17,7 @@ def field_setup():
             "webconfigurable": True,
             "description": "Short name for the node"
         },
-        { 'key': "node_netaddress",
+        {   'key': "node_netaddress",
             'defval': "localhost",
             'label' : "Node Network Address",
             "type" : "smalltxt",
@@ -25,7 +25,7 @@ def field_setup():
             "webconfigurable": True,
             "description": "DNS or IP address through which to reach the node",
         },
-        { 'key': "node_description",
+        {   'key': "node_description",
             'defval': "USE THIS TO IDENTIFIY THE POSITION OF THE NODE",
             'label' : "Node Description",
             "type" : "largetxt",
@@ -33,7 +33,7 @@ def field_setup():
             "webconfigurable": True,
             "description": """Longer description of the node, potentially usefull for locating the    node when it sends out an alarm.""",
         },
-        { 'key': "temperature_max",
+        {   'key': "temperature_max",
             'defval': 26,
             'label' : "Maximum Temperature",
             "type" : "intrange",
@@ -41,7 +41,7 @@ def field_setup():
             "webconfigurable": True,
             "description": "Temperature upper treshhold in Celsisus for sending an e-mail alarm.",
         },
-        { 'key': "humidity_min",
+        {   'key': "humidity_min",
             'defval': 35,
             'label' : "Minimum Humidity",
             "type" : "intrange",
@@ -49,7 +49,7 @@ def field_setup():
             "webconfigurable": True,
             "description": "Humidty lower percentage treshhold  for sending an e-mail alarm.",
         },
-        { 'key': "humidity_max",
+        {   'key': "humidity_max",
             'defval': 65,
             'label' : "Maximum Humidity",
             "type" : "intrange",
@@ -57,7 +57,7 @@ def field_setup():
             "webconfigurable": True,
             "description": "Humidty upper percentage treshhold for sending an e-mail alarm.",
         },
-        { 'key': "alarm_from_address",
+        {   'key': "alarm_from_address",
             'defval': "root@localhost",
             'label' : "Alarm From Address",
             "type" : "email",
@@ -65,7 +65,7 @@ def field_setup():
             "webconfigurable": True,
             "description": "Sender e-mail adresser for alarm mails.",
         },
-        { 'key': "alarm_to_addresses",
+        {   'key': "alarm_to_addresses",
             'defval': "root@localhost",
             'label' : "Alarm Recipients",
             "type" : "largetxt",
@@ -73,7 +73,7 @@ def field_setup():
             "webconfigurable": True,
             "description": "List of ;-seperated addresses to send alarm e-mails to.",
         },
-        { 'key': "SMTP_server",
+        {   'key': "SMTP_server",
             'defval': "smtp.gmail.com:587",
             'label' : "SMTP Mailserver",
             "type" : "smalltxt",
@@ -81,7 +81,7 @@ def field_setup():
             "webconfigurable": True,
             "description": "URI for the SMTP server through which to send e-mail alarms.",
         },
-        { 'key': "SMTP_username",
+        {   'key': "SMTP_username",
             'defval': "",
             'label' : "SMTP Username",
             "type" : "smalltxt",
@@ -89,7 +89,7 @@ def field_setup():
             "webconfigurable": True,
             "description": "Optional, for use with  smtp servers requiring authentication ie. gmail",
         },
-        { 'key': "SMTP_password",
+        {   'key': "SMTP_password",
             'defval': "",
             'label' : "SMTP Password",
             "type" : "password",
@@ -97,7 +97,7 @@ def field_setup():
             "webconfigurable": True,
             "description": "Optional, for use with  smtp servers requiring authentication ie. gmail",
         },
-        { 'key': "default_view_hours",
+        {   'key': "default_view_hours",
             'defval': 48,
             'label' : "Default Data View",
             "type" : "intrage",
@@ -106,7 +106,7 @@ def field_setup():
             "description": "Number of hours prior for default dataview.",
         },
 
-        { 'key': "tmp_dir",
+        {   'key': "tmp_dir",
             'defval': "/ramdisk",
             'label' : "tmp storage for working data",
             "type" : "smalltxt",
@@ -114,7 +114,7 @@ def field_setup():
             "webconfigurable": False,
             "description": "You can change this in the cfg file, but you should leave it to a qualified programmer.",
         },
-        { 'key': "data_dir",
+        {   'key': "data_dir",
             'defval': "data",
             'label' : "permanent storage location relative to cgi dir",
             "type" : "smalltxt",
@@ -122,7 +122,7 @@ def field_setup():
             "webconfigurable": False,
             "description": "You can change this in the cfg file, but you should leave it to a qualified programmer.",
         },
-        { 'key': "max_plot_points",
+        {   'key': "max_plot_points",
             'defval': 640,
             'label' : "Wobbly limit on number of points in plots.",
             "type" : "intrange",
@@ -130,7 +130,7 @@ def field_setup():
             "webconfigurable": False,
             "description": """You can change this in the cfg file, but you should leave it to a qualified programmer.""",
         },
-        { 'key': "sample_period",
+        {   'key': "sample_period",
             'defval': 10,
             'label' : "Minutes between data points, also number of samples that a datapoint is averaged from",
             "type" : "intrange",
@@ -150,27 +150,28 @@ def json_out():
         de = elist[i]
         de["value"] = cfg.get('settings', de['key'])
         outup[i] = de
-    return outup
+    return json.dumps(outup, sort_keys=False,indent=2, separators=(',', ': '))
 
 def read(fname):
-    dflts = {}
-
-    for de in field_setup():
-        dflts[de["key"]] = de["defval"]
-
+    
     #read config file if present
-    cfg = ConfigParser.RawConfigParser(dflts)
+    cfg = ConfigParser.ConfigParser(allow_no_value=True)
     if os.path.exists(fname):
         cfg.read(fname)
 
     if not cfg.has_section("settings"):
         cfg.add_section('settings')
+    
+    for de in field_setup():
+        if not cfg.has_option('settings', de["key"]):
+            cfg.set('settings', de["key"], str(de["defval"]))
 
     return cfg
 
 def write(cfg, fname):
     with open(fname, 'w') as cfgfile:
         cfg.write(cfgfile)
+        os.fchmod(cfgfile.fileno(), stat.S_IRGRP | stat.S_IWGRP | stat.S_IWUSR | stat.S_IRUSR)
 
 def dformat():
     return "%Y-%m-%d %H:%M"
@@ -181,12 +182,12 @@ def dfilename_fmt():
 def webreq(form):
     cfg = read('rb_preserve.cfg')
     for k in form.keys():
-        cfg.set('settings', k, form[k])
+        cfg.set('settings', k, form[k].value)
     write(cfg, 'rb_preserve.cfg')
     
-    return "Content-type:text/html\r\n\r\n%s" % json.dumps(json_out())
+    return  json_out()
     
 if __name__ == "__main__":
     form = cgi.FieldStorage()
-    print webreq(form)
+    print "Content-type:application/json\r\n\r\n%s" % webreq(form)
 

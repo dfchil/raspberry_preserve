@@ -114,7 +114,7 @@ function show_cfg(a_cfg){
 
 function submit_cfg(){
     $.ajax({
-      url: "pconfig.py",
+      url: "cgi/pconfig.py",
       type: "POST",
       data: $("#cfgform").serialize(),
       dataType: "json",
