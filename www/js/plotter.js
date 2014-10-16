@@ -44,92 +44,6 @@ function replot(a_origin, a_begin, a_end, a_width, a_height){
     $('#svg1').replaceWith(nsvg);
 }
 
-function text_input(d){
-  var nlabel = $(document.createElement( "label" ));
-  var nspan = $(document.createElement( "span" )).text(d['label']+ " :");
-
-
-  if (d['type'] == "largetxt"){
-    var ninput = $(document.createElement( "textarea" ));
-    ninput.text(d['value']);
-  }
-  else{
-    var ninput = $(document.createElement( "input" ));
-    ninput.attr("type", d['type']);
-    ninput.val(d['value']);
-  }
-
-  ninput.attr({'id' : d['key'], 
-                'name' : d['key'],
-                "placeholder" : d['defval'],
-                "title" : d['description'],
-              });
-  nlabel.append(nspan);
-  nlabel.append(ninput);
-  return nlabel;
-}
-
-function intrange_input(d){
-  var nlabel = $(document.createElement( "label" ));
-  var nspan = $(document.createElement( "span" )).text(d['label']+ " :");
-  var nselect = $(document.createElement( "select" ));
-  nselect.attr({'id' : d['key'], 
-                'name' : d['key'],
-              });
-  for(var i = d['range'][0]; i < d['range'][1]; i++){
-    var opt = $(document.createElement( "option"));
-    opt.text(""+i);
-    opt.val(""+i);
-    if (i == d['value'])
-      opt.prop('selected', true);
-    nselect.append(opt);
-  }
-  nlabel.append(nspan);
-  nlabel.append(nselect);
-  return nlabel;
-}
-
-function show_cfg(){
-  var cfgdata = config_json();
-
-  var ncfg = $(document.createElement('div')).addClass("white-pink");
-  
-  $("#tabs1-cfg").append(ncfg);
-  var nch1 = $(document.createElement('h1')).text("System Configuration");
-  nch1.append($(document.createElement('span')).text('Further configuration options available in the rb_preserve.cfg file'));
-  ncfg.append(nch1);
-
-  var ncfgfrm = $(document.createElement('div')).attr("id", "cfgframe");    
-  ncfg.append(ncfgfrm);
-
-  for (var i = 0; i < Object.keys(cfgdata).length; i++){
-    var d = cfgdata[""+i];
-
-    if (d['webconfigurable']){
-      switch(d['type']) {
-          case 'smalltxt':
-            d['type'] = 'text';
-          case 'email':
-          case 'password':
-          case 'largetxt':
-              ncfgfrm.append(text_input(d));
-              break;
-          case 'intrange':
-              ncfgfrm.append(intrange_input(d));
-          default:
-            break;
-      }
-    }
-  }
-  
-  ncfg.append(document.createElement('label'));
-  ncfg.first().append(document.createElement('span'));
-  ncfg.first().append($(document.createElement('input')).attr({
-      "type": "button", "class": "button", "value": "Apply"
-  }));
-  
-  
-}
 function show_range(){
   $( "#tabs1-data").find( "span" ).first().text(
                         "Datapoints from: "+ 
@@ -178,6 +92,6 @@ $(document).ready( function() {
           replot();
           }, true); 
       });
-  show_cfg();
+  $("#tabs1-cfg").append(show_cfg());
   replot();
 });
