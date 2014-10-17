@@ -5,11 +5,13 @@ import sys
 import time
 import pconfig
 import smtplib
+import cgi
 
-def send_warning(descr, value, cfg):
+def send_warning(descr, value, cfg, toaddrs=None):
     # Specifying the from and to addresses
     from_address = cfg.get('settings', 'alarm_from_address');
-    toaddrs  = cfg.get('settings', 'alarm_to_addresses');
+    if toaddrs == None:
+        toaddrs  = cfg.get('settings', 'alarm_to_addresses');
     node_name = cfg.get('settings', 'node_name');
     node_description = cfg.get('settings', 'node_description');
     node_netaddress =  cfg.get('settings', 'node_netaddress');
@@ -43,12 +45,21 @@ Browse the data historiy of %s at:
     
     if len(username) > 0 and len(password) > 0:
         server.login(username,password)
-    server.sendmail(from_address, toaddrs, header + message)
+    server.sendmail(from_address, toaddrs.split(";"), header + message)
     server.quit()
 
-def main(argv=None):    
+
+
+def webreq(form):
     cfg = pconfig.read('rb_preserve.cfg')
-    send_warning("Test", "-1.0", cfg)
+    try:
+        sndto = form.getvalue('alarm_to_addresses')
+        send_warning("Test", "-1.0", cfg, toaddrs=sndto)
+        return "".join([ "Test mail successfully sent to the following recipients:\n",
+        sndto.replace(";", "\n")])
+    except Exception as e:
+        return str(e)
 
 if __name__ == "__main__":
-    sys.exit(main())
+    form = cgi.FieldStorage()
+    print "Content-type:text/html\r\n\r\n%s" % webreq()

@@ -10,6 +10,7 @@ from flup.server.fcgi import WSGIServer
 import plotter
 import serverside_js
 import pconfig
+import mail
 
 def app(env, start_response):
     if env['SCRIPT_NAME'] == "/cgi/plotter.py":
@@ -25,6 +26,12 @@ def app(env, start_response):
       start_response('200 OK', [('Content-Type', 'application/json')])
       form = cgi.FieldStorage(environ=env)
       yield pconfig.webreq(form)
+
+    elif env['SCRIPT_NAME'] == "/cgi/mail.py":
+      start_response('200 OK', [('Content-Type', 'text/html')])
+      form = cgi.FieldStorage(environ=env)
+      yield mail.webreq(form)
+
 
     else:
       start_response('200 OK', [('Content-Type', 'text/html')])

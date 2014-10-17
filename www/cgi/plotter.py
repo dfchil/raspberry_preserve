@@ -64,8 +64,6 @@ def webreq(form):
   if getvals['begin'] < firstvalue:
     getvals['begin'] = firstvalue
 
-
-
   return plot.draw_svg(getvals['begin'], getvals['end'], 
                       int(getvals['width']), int(getvals['height'])).replace("</svg>","""
   <script type="text/javascript">
@@ -78,6 +76,5 @@ def webreq(form):
 
 if __name__ == "__main__":
   form = cgi.FieldStorage()
-  print "Content-type:text/html\r\n\r\n"
-  print webreq(form)
+  print "Content-type:text/html\r\n\r\n %s" % webreq(form)
 

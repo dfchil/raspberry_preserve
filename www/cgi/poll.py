@@ -5,63 +5,62 @@ import sys
 import time
 import os
 import pconfig
-import smtplib
+import mail
 
+# def send_warning(descr, value, cfg):
+#     # Specifying the from and to addresses
+#     from_address = cfg.get('settings', 'alarm_from_address');
+#     toaddrs  = cfg.get('settings', 'alarm_to_addresses');
+#     node_name = cfg.get('settings', 'node_name');
+#     node_description = cfg.get('settings', 'node_description');
+#     node_netaddress =  cfg.get('settings', 'node_netaddress');
+#     interval =  cfg.get('settings', 'sample_period');
+#
+#     header = """From: %s
+# To: %s
+# Subject: %s warning from %s
+#
+#
+# """  % (from_address, toaddrs, descr, node_name)
+#     message = """
+# %s of %.2f measured on %s as an average over the last %d minutes.
+#
+# %s has the following description: %s
+#
+# Browse the data historiy of %s at:
+# %s .
+#
+# """ %(descr, float(value), node_name, int(interval),
+#     node_name, node_description,
+#     node_name, node_netaddress)
+#
+#     # Gmail Login
+#     username = cfg.get('settings', 'smtp_username');
+#     password = cfg.get('settings', 'smtp_password');
+#
+#     # Sending the mail
+#     server = smtplib.SMTP(cfg.get('settings', 'smtp_server'))
+#     server.starttls()
+#
+#     if len(username) > 0 and len(password) > 0:
+#         server.login(username,password)
+#     server.sendmail(from_address, toaddrs, header + message)
+#     server.quit()
 
 def poll():
     sensor = Adafruit_DHT.AM2302
     pin = 4
     return Adafruit_DHT.read_retry(sensor, pin)
 
-def send_warning(descr, value, cfg):
-    # Specifying the from and to addresses
-    from_address = cfg.get('settings', 'alarm_from_address');
-    toaddrs  = cfg.get('settings', 'alarm_to_addresses');
-    node_name = cfg.get('settings', 'node_name');
-    node_description = cfg.get('settings', 'node_description');
-    node_netaddress =  cfg.get('settings', 'node_netaddress');
-    interval =  cfg.get('settings', 'sample_period');
-
-    header = """From: %s
-To: %s
-Subject: %s warning from %s
-
-
-"""  % (from_address, toaddrs, descr, node_name)
-    message = """
-%s of %.2f measured on %s as an average over the last %d minutes.
-
-%s has the following description: %s
-
-Browse the data historiy of %s at: 
-%s . 
-
-""" %(descr, float(value), node_name, int(interval), 
-    node_name, node_description,
-    node_name, node_netaddress)
-
-    # Gmail Login
-    username = cfg.get('settings', 'smtp_username');
-    password = cfg.get('settings', 'smtp_password');
-
-    # Sending the mail  
-    server = smtplib.SMTP(cfg.get('settings', 'smtp_server'))
-    server.starttls()
-    
-    if len(username) > 0 and len(password) > 0:
-        server.login(username,password)
-    server.sendmail(from_address, toaddrs, header + message)
-    server.quit()
-
 def warning_test(humidity, temperature, cfg):
     #if humidity outside range
     if humidity < float(cfg.get('settings', 'humidity_min')):
-        send_warning("Low humidty", humidity, cfg)
+        mail.send_warning("Low humidty", humidity, cfg)
     if humidity > float(cfg.get('settings', 'humidity_max')):
-        send_warning("High humidty", humidity, cfg)
+        mail.send_warning("High humidty", humidity, cfg)
         
     if temperature > float(cfg.get('settings', 'temperature_max')):
-        send_warning("High temperature", temperature, cfg)
+        mail.send_warning("High temperature", temperature, cfg)
         
 
 

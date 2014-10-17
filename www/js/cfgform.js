@@ -16,7 +16,7 @@ function text_input(d){
 
   ninput.attr({'id' : d['key'], 
                 'name' : d['key'],
-                "placeholder" : d['defval'],
+                "placeholder" : d['defval'].length>0?d['defval']:" ",
               });
   nlabel.append(nspan);
   nlabel.append(ninput);
@@ -31,9 +31,11 @@ function intrange_input(d){
   nselect.attr({'id' : d['key'], 
                 'name' : d['key']
               });
-  for(var i = d['range'][0]; i < d['range'][1]; i++){
+  for(  var i = d['range'][0]; 
+        i <= d['range'][1];
+        i = (d['type'] == 'intrange'?i+1:parseInt(i*1.4))){
     var opt = $(document.createElement( "option"));
-    opt.text(""+i);
+    opt.text(""+i + d['symbol']);
     opt.val(""+i);
     if (i == d['value'])
       opt.prop('selected', true);
@@ -66,6 +68,17 @@ function init_tooltips(outerelement){
         });
 }
 
+
+function new_btn(label, click){
+    var lbl = $(document.createElement('label')).append(
+        $(document.createElement('span')));
+  
+    lbl.first().append($(document.createElement('input')).attr({
+        "type": "button", "class": "button", "value": label
+    }).on('click', click));
+    return lbl;
+}
+
 function show_cfg(a_cfg){
   var cfgdata = a_cfg || config_json();
   var ncfg = $(document.createElement('div')).addClass("white-pink").
@@ -93,32 +106,45 @@ function show_cfg(a_cfg){
               ncfgfrm.append(text_input(d));
               break;
           case 'intrange':
+          case 'logrange':
               ncfgfrm.append(intrange_input(d));
           default:
             break;
       }
     }
   }
-  
-  ncfg.append(document.createElement('label'));
-  ncfg.first().append(document.createElement('span'));
-  
-  var abtn = $(document.createElement('input')).attr({
-      "type": "button", "class": "button", "value": "Apply"
-  }).on('click', function(){submit_cfg();});
-  ncfg.first().append(abtn);
-  
+
+  ncfgfrm.append(new_btn("Apply Config", submit_cfg));
+
+  ncfgfrm.find('#SMTP_password').parent().after(
+      new_btn("Send Test Mail", test_mail));
+
   init_tooltips(ncfg);
   return ncfg;
+}
+
+function test_mail(){
+    $('#cfgodiv').fadeOut();
+    $.ajax({
+      url: "cgi/mail.py",
+      type: "GET",
+      data: $("#cfgform").serialize(),
+      dataType: "html",
+    }).done(function(a_response){
+        $('#cfgodiv').fadeIn();
+        alert(a_response);
+    });
 }
 
 function submit_cfg(){
     $.ajax({
       url: "cgi/pconfig.py",
-      type: "POST",
+      type: "GET",
       data: $("#cfgform").serialize(),
       dataType: "json",
     }).done(function(a_cfg){
-         $('#cfg_frm').replaceWith(show_cfg(a_cfg));
+        var tspeed = 200;
+        $('#cfg_frm').replaceWith(show_cfg(a_cfg));
+        $('#cfgodiv').fadeOut(tspeed).fadeIn(tspeed);
      });
 }
