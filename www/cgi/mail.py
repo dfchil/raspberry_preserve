@@ -62,4 +62,4 @@ def webreq(form):
 
 if __name__ == "__main__":
     form = cgi.FieldStorage()
-    print "Content-type:text/html\r\n\r\n%s" % webreq()
+    print "Content-type:text/html\r\n\r\n%s" % webreq(form)
