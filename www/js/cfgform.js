@@ -124,16 +124,19 @@ function show_cfg(a_cfg){
 }
 
 function test_mail(){
-    $('#cfgodiv').fadeOut();
-    $.ajax({
-      url: "cgi/mail.py",
-      type: "GET",
-      data: $("#cfgform").serialize(),
-      dataType: "html",
-    }).done(function(a_response){
-        $('#cfgodiv').fadeIn();
-        alert(a_response);
-    });
+    if (confirm("Send test mail to:\n" + 
+                $('#alarm_to_addresses').val().split(";").join("\n") +"\n?")){
+        $('#cfgodiv').fadeOut();
+        $.ajax({
+          url: "cgi/mail.py",
+          type: "GET",
+          data: $("#cfgform").serialize(),
+          dataType: "html",
+        }).done(function(a_response){
+            $('#cfgodiv').fadeIn();
+            alert(a_response);
+        });
+    }
 }
 
 function submit_cfg(){
