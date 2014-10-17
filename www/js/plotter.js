@@ -40,7 +40,6 @@ function replot(a_origin, a_begin, a_end, a_width, a_height){
                 'width' : width+20, 
                 'height': height+20,
                 'data':  url });
-    // $("#tabs1-data").append(nsvg);
     $('#svg1').replaceWith(nsvg);
 }
 
@@ -92,6 +91,6 @@ $(document).ready( function() {
           replot();
           }, true); 
       });
-  $("#tabs1-cfg").append(show_cfg());
   replot();
+  $("#tabs1-cfg").append(show_cfg());
 });
