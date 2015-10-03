@@ -1,8 +1,28 @@
 #!/usr/bin/env python
 # encoding: utf-8
+#
+# Copyright 2014 Daniel Fairchild
+#
+# This file is part of raspberry_preserve.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2, or (at your option)
+# any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; see the file COPYING.  If not, write to
+# the Free Software Foundation, Inc., 51 Franklin Street,
+# Boston, MA 02110-1301, USA.
+#
 
-# Import modules for CGI handling 
-import cgi, cgitb 
+# Import modules for CGI handling
+import cgi, cgitb
 import plot
 import pconfig
 import time
@@ -16,7 +36,7 @@ def webreq(form):
 
   #default time is past 24 hours
   firstvalue, lastvalue = plot.data_span()
-  
+
   tend =   lastvalue
   deftimeview = 60*60*int(cfg.get('settings', 'default_view_hours'))
 
@@ -33,18 +53,18 @@ def webreq(form):
   for k,v in getvals.iteritems():
     getvals[k] = cond_read(k, v, form)
 
-  #try parsing string values 
+  #try parsing string values
   try:
     getvals['end'] = time.mktime(time.strptime(getvals['end'], timeformat))
   except:
     getvals['end'] = tend
 
   try:
-    getvals['begin'] = time.mktime(time.strptime(getvals['begin'], timeformat)) 
+    getvals['begin'] = time.mktime(time.strptime(getvals['begin'], timeformat))
   except:
     getvals['begin'] = tend - deftimeview
 
-    
+
   # test that begin is before end
   if getvals['begin'] >= getvals['end']:
       if getvals['origin'] == "end":
@@ -60,11 +80,11 @@ def webreq(form):
   elif getvals['end'] <= firstvalue:
     getvals['end'] = firstvalue + deftimeview
     getvals['begin'] = firstvalue
-    
+
   if getvals['begin'] < firstvalue:
     getvals['begin'] = firstvalue
 
-  return plot.draw_svg(getvals['begin'], getvals['end'], 
+  return plot.draw_svg(getvals['begin'], getvals['end'],
                       int(getvals['width']), int(getvals['height'])).replace("</svg>","""
   <script type="text/javascript">
     top.max_secs = function(){return %f;};
@@ -72,7 +92,7 @@ def webreq(form):
     top.set_time_pickers(%f, %f);
   </script>
 </svg>""" % (lastvalue *1000, getvals['begin']*1000, getvals['end']*1000))
-#                     
+#
 
 if __name__ == "__main__":
   form = cgi.FieldStorage()

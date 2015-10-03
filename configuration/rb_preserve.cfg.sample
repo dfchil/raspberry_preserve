@@ -1,0 +1,17 @@
+[settings]
+node_name = 
+node_netaddress = localhost
+node_description = USE THIS TO IDENTIFIY THE POSITION OF THE NODE
+alarm_from_address = root@localhost
+alarm_to_addresses = root@localhost
+smtp_server = smtp.gmail.com:587
+smtp_username = 
+smtp_password = 
+sample_period = 10
+temperature_max = 26
+humidity_min = 35
+humidity_max = 65
+default_view_hours = 48
+tmp_dir = /run/shm
+data_dir = data
+max_plot_points = 320
