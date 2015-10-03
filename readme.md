@@ -100,6 +100,7 @@ so you can skip the step to download the library:
 	    sudo nano raspberry_preserve/www/cgi/rb_preserve.cfg
 
     Finally restart the web server:
+
 	    sudo /etc/init.d/lighttpd restart
 
 6. Install cronjob to execute poll.py every minute:
