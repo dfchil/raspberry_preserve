@@ -1,51 +1,31 @@
 #!/usr/bin/env python
 # encoding: utf-8
+#
+# Copyright 2014 Daniel Fairchild
+#
+# This file is part of raspberry_preserve.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2, or (at your option)
+# any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; see the file COPYING.  If not, write to
+# the Free Software Foundation, Inc., 51 Franklin Street,
+# Boston, MA 02110-1301, USA.
+#
 
 import sys
 import time
 import os
 import pconfig
 import mail
-
-# def send_warning(descr, value, cfg):
-#     # Specifying the from and to addresses
-#     from_address = cfg.get('settings', 'alarm_from_address');
-#     toaddrs  = cfg.get('settings', 'alarm_to_addresses');
-#     node_name = cfg.get('settings', 'node_name');
-#     node_description = cfg.get('settings', 'node_description');
-#     node_netaddress =  cfg.get('settings', 'node_netaddress');
-#     interval =  cfg.get('settings', 'sample_period');
-#
-#     header = """From: %s
-# To: %s
-# Subject: %s warning from %s
-#
-#
-# """  % (from_address, toaddrs, descr, node_name)
-#     message = """
-# %s of %.2f measured on %s as an average over the last %d minutes.
-#
-# %s has the following description: %s
-#
-# Browse the data historiy of %s at:
-# %s .
-#
-# """ %(descr, float(value), node_name, int(interval),
-#     node_name, node_description,
-#     node_name, node_netaddress)
-#
-#     # Gmail Login
-#     username = cfg.get('settings', 'smtp_username');
-#     password = cfg.get('settings', 'smtp_password');
-#
-#     # Sending the mail
-#     server = smtplib.SMTP(cfg.get('settings', 'smtp_server'))
-#     server.starttls()
-#
-#     if len(username) > 0 and len(password) > 0:
-#         server.login(username,password)
-#     server.sendmail(from_address, toaddrs, header + message)
-#     server.quit()
 
 def poll():
     sensor = Adafruit_DHT.AM2302
@@ -58,11 +38,9 @@ def warning_test(humidity, temperature, cfg):
         mail.send_warning("Low humidty", humidity, cfg)
     if humidity > float(cfg.get('settings', 'humidity_max')):
         mail.send_warning("High humidty", humidity, cfg)
-        
+
     if temperature > float(cfg.get('settings', 'temperature_max')):
         mail.send_warning("High temperature", temperature, cfg)
-        
-
 
 def condense(tmplnes):
     td = []
@@ -85,21 +63,21 @@ def condense(tmplnes):
     tt /= len(td)
     return (th, tt)
 
-def main(argv=None):    
+def main(argv=None):
     cfg = pconfig.read('rb_preserve.cfg')
 
     ddir = cfg.get('settings', 'data_dir')
     timeformat = pconfig.dformat();
     pwd = os.path.dirname(os.path.realpath(__file__))
-    
+
     #sample sensor
     humidity = None
     temperature = None
-    
+
     while humidity == None and temperature == None:
         humidity, temperature = poll()
 
-    # see if 
+    # see if
     tmpfn = os.path.join(cfg.get('settings', 'tmp_dir'), "intermediary.data")
 
     if os.path.exists(tmpfn):
@@ -107,14 +85,14 @@ def main(argv=None):
             lines = pd.readlines()
     else:
         lines = []
-    
+
     lines.append("%.2f,%.02f\n" % (humidity, temperature))
-    
-    if len(lines) >= int(cfg.get('settings', 'sample_period')):        
+
+    if len(lines) >= int(cfg.get('settings', 'sample_period')):
         avg_hum, avg_temp = condense(lines)
         warning_test(avg_hum, avg_temp, cfg)
         lines = []   # zerro tmp file
-        
+
         #store in persistent file
         pfname = "%s/%s/%s.data" % (pwd, ddir, time.strftime(pconfig.dfilename_fmt()))
         pstr = "%s,%.2f,%.02f\n" % (time.strftime(timeformat), avg_hum, avg_temp)

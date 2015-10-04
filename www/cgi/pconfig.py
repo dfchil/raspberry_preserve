@@ -1,5 +1,25 @@
 #!/usr/bin/env python
 # encoding: utf-8
+#
+# Copyright 2014 Daniel Fairchild
+#
+# This file is part of raspberry_preserve.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2, or (at your option)
+# any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; see the file COPYING.  If not, write to
+# the Free Software Foundation, Inc., 51 Franklin Street,
+# Boston, MA 02110-1301, USA.
+#
 
 import ConfigParser
 import os
@@ -30,7 +50,7 @@ def field_setup():
             "type" : "largetxt",
             "webconfigurable": True,
             "description": """Longer description of the node, potentially usefull
-for locating the    node when it sends out an alarm.""",
+for locating the node when it sends out an alarm.""",
         },
         {   'key': "alarm_from_address",
             'defval': "root@localhost",
@@ -44,7 +64,7 @@ for locating the    node when it sends out an alarm.""",
             'label' : "Alarm Recipients",
             "type" : "largetxt",
             "webconfigurable": True,
-            "description": """List of ;-seperated addresses to send alarm 
+            "description": """List of ;-seperated addresses to send alarm
 e-mails to.""",
         },
         {   'key': "SMTP_server",
@@ -52,7 +72,7 @@ e-mails to.""",
             'label' : "SMTP Mailserver",
             "type" : "smalltxt",
             "webconfigurable": True,
-            "description": """URI for the SMTP server through which to send 
+            "description": """URI for the SMTP server through which to send
 e-mail alarms.""",
         },
         {   'key': "SMTP_username",
@@ -60,7 +80,7 @@ e-mail alarms.""",
             'label' : "SMTP Username",
             "type" : "smalltxt",
             "webconfigurable": True,
-            "description": """Optional, for use with  smtp servers requiring 
+            "description": """Optional, for use with  smtp servers requiring
 authentication ie. gmail""",
         },
         {   'key': "SMTP_password",
@@ -68,7 +88,7 @@ authentication ie. gmail""",
             'label' : "SMTP Password",
             "type" : "password",
             "webconfigurable": True,
-            "description": """Optional, for use with  smtp servers requiring 
+            "description": """Optional, for use with  smtp servers requiring
 authentication ie. gmail""",
         },
         {   'key': "sample_period",
@@ -78,7 +98,7 @@ authentication ie. gmail""",
             "type" : "intrange",
             "range" : [1, 120],
             "webconfigurable": True,
-            "description": """Interval in minutes between data point recording, 
+            "description": """Interval in minutes between data point recording,
 also number of samples that a datapoint is averaged from.
 
 The system is capabale of handling mixed histories of varying sampling intervals.
@@ -91,7 +111,7 @@ The system is capabale of handling mixed histories of varying sampling intervals
             "type" : "intrange",
             "range" : [-273,100],
             "webconfigurable": True,
-            "description": """Temperature upper treshhold in degrees Celsius for sending 
+            "description": """Temperature upper treshhold in degrees Celsius for sending
 an e-mail alarm.""",
         },
         {   'key': "humidity_min",
@@ -101,7 +121,7 @@ an e-mail alarm.""",
             "type" : "intrange",
             "range" : [0,100],
             "webconfigurable": True,
-            "description": """Humidty lower percentage treshhold  for sending an 
+            "description": """Humidty lower percentage treshhold  for sending an
 e-mail alarm.""",
         },
         {   'key': "humidity_max",
@@ -111,7 +131,7 @@ e-mail alarm.""",
             "type" : "intrange",
             "range" : [0,100],
             "webconfigurable": True,
-            "description": """Humidty upper percentage treshhold for sending an 
+            "description": """Humidty upper percentage treshhold for sending an
 e-mail alarm.""",
         },
         {   'key': "default_view_hours",
@@ -125,11 +145,11 @@ e-mail alarm.""",
         },
 
         {   'key': "tmp_dir",
-            'defval': "/ramdisk",
+            'defval': "/run/shm",
             'label' : "tmp storage for working data",
             "type" : "smalltxt",
             "webconfigurable": False,
-            "description": """"You can change this in the cfg file, but you 
+            "description": """"You can change this in the cfg file, but you
 should leave it to a qualified programmer.""",
         },
         {   'key': "data_dir",
@@ -137,7 +157,7 @@ should leave it to a qualified programmer.""",
             'label' : "permanent storage location relative to cgi dir",
             "type" : "smalltxt",
             "webconfigurable": False,
-            "description": """"You can change this in the cfg file, but you 
+            "description": """"You can change this in the cfg file, but you
 should leave it to a qualified programmer.""",
         },
         {   'key': "max_plot_points",
@@ -151,7 +171,7 @@ should leave it to a qualified programmer.""",
         },
     ]
 
-def json_out():        
+def json_out():
     cfg = read("rb_preserve.cfg")
     elist = field_setup()
     outup = {}
@@ -165,7 +185,7 @@ def json_out():
     return json.dumps(outup, sort_keys=False,indent=2, separators=(',', ': '))
 
 def read(fname):
-    
+
     #read config file if present
     cfg = ConfigParser.ConfigParser(allow_no_value=True)
     if os.path.exists(fname):
@@ -173,7 +193,7 @@ def read(fname):
 
     if not cfg.has_section("settings"):
         cfg.add_section('settings')
-    
+
     for de in field_setup():
         if not cfg.has_option('settings', de["key"]):
             cfg.set('settings', de["key"], str(de["defval"]))
@@ -186,18 +206,18 @@ def write(cfg, fname):
 
 def dformat():
     return "%Y-%m-%d %H:%M"
-        
+
 def dfilename_fmt():
     return "%Y-%m"
-    
+
 def webreq(form):
     cfg = read('rb_preserve.cfg')
     for k in form.keys():
         cfg.set('settings', k, form[k].value)
     write(cfg, 'rb_preserve.cfg')
-    
+
     return  json_out()
-    
+
 if __name__ == "__main__":
     form = cgi.FieldStorage()
     print "Content-type:application/json\r\n\r\n%s" % webreq(form)

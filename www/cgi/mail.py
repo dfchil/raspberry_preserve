@@ -1,5 +1,25 @@
 #!/usr/bin/env python
 # encoding: utf-8
+#
+# Copyright 2014 Daniel Fairchild
+#
+# This file is part of raspberry_preserve.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2, or (at your option)
+# any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; see the file COPYING.  If not, write to
+# the Free Software Foundation, Inc., 51 Franklin Street,
+# Boston, MA 02110-1301, USA.
+#
 
 import sys
 import time
@@ -28,10 +48,10 @@ Subject: %s warning from %s
 
 %s has the following description: %s
 
-Browse the data historiy of %s at: 
-%s . 
+Browse the data historiy of %s at:
+%s .
 
-""" %(descr, float(value), node_name, int(interval), 
+""" %(descr, float(value), node_name, int(interval),
     node_name, node_description,
     node_name, node_netaddress)
 
@@ -39,16 +59,14 @@ Browse the data historiy of %s at:
     username = cfg.get('settings', 'smtp_username');
     password = cfg.get('settings', 'smtp_password');
 
-    # Sending the mail  
+    # Sending the mail
     server = smtplib.SMTP(cfg.get('settings', 'smtp_server'))
     server.starttls()
-    
+
     if len(username) > 0 and len(password) > 0:
         server.login(username,password)
     server.sendmail(from_address, toaddrs.split(";"), header + message)
     server.quit()
-
-
 
 def webreq(form):
     cfg = pconfig.read('rb_preserve.cfg')

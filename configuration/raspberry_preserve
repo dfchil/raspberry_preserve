@@ -1,0 +1,9 @@
+#
+# cron.d/raspberry_preserve -- polling the sensors every minute
+#
+# Copyright © Daniel Fairchild
+# distributed under the terms of the GNU General Public License either
+# version 2, or (at your option) any later version.
+#
+
+* * * * * root cd /var/www/cgi/ && /usr/bin/python poll.py | logger
